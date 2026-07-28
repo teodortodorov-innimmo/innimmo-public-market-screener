@@ -1,0 +1,1015 @@
+[
+ {
+  "ticker": "FP.RO",
+  "name": "Fondul Proprietatea",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 1730879360.0,
+    "calc": 1730879374.073,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 0.7421,
+    "calc": 0.7421,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 4.1929,
+    "calc": 4.1929,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0768,
+    "calc": 0.0852,
+    "status": "MISMATCH"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 0.791,
+    "calc": 0.7951,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.197,
+    "calc": 0.1919,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "OTP.BD",
+  "name": "OTP",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 11769363824640.0,
+    "calc": 11769363223920.0,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 2.1241,
+    "calc": 2.1241,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 10.5155,
+    "calc": 10.5155,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0245,
+    "calc": 0.0244,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 21826.086,
+    "calc": 22097.7737,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.2055,
+    "calc": 0.2033,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "TLV.RO",
+  "name": "BANCA TRANSILVANIA CLUJ NAPOCA",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 46581731328.0,
+    "calc": 46581728291.28,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 2.0119,
+    "calc": 2.0119,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 9.5601,
+    "calc": 9.5601,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0298,
+    "calc": 0.03,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 18.579,
+    "calc": 17.9832,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.2317,
+    "calc": 0.208,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "BG.VI",
+  "name": "BAWAG Group AG",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 13363198976.0,
+    "calc": 13363199388.0,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 2.8398,
+    "calc": 2.8398,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 16.9036,
+    "calc": 16.9036,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0365,
+    "calc": 0.036,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 61.131,
+    "calc": 62.824,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.1989,
+    "calc": 0.1778,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "EBS.VI",
+  "name": "Erste Group Bank AG",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 44278308864.0,
+    "calc": 44278309536.0,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 1.8931,
+    "calc": 1.8931,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 13.3022,
+    "calc": 13.3022,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0066,
+    "calc": 0.0066,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 60.218,
+    "calc": 67.7049,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.1252,
+    "calc": 0.1335,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "TPEIR.AT",
+  "name": "PIRAEUS BANK S.A.",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 11593923584.0,
+    "calc": 11593923902.16,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 1.2119,
+    "calc": 1.2119,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 10.9651,
+    "calc": 10.9651,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0435,
+    "calc": 0.0424,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 7.781,
+    "calc": 7.5634,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.116,
+    "calc": 0.1151,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "KTY.WA",
+  "name": "KETY",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 13081926656.0,
+    "calc": 13081926944.0,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 6.0467,
+    "calc": 6.0467,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 22.1536,
+    "calc": 22.1536,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.037,
+    "calc": 0.0369,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 219.458,
+    "calc": 202.8753,
+    "status": "OK"
+   },
+   {
+    "check": "net debt: summary vs statements",
+    "summary": 1234999936.0,
+    "calc": 1385000000.0,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.2805,
+    "calc": 0.284,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "ALE.WA",
+  "name": "ALLEGRO",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 45392146432.0,
+    "calc": 45392149465.6,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 4.2937,
+    "calc": 4.2937,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 25.4545,
+    "calc": 25.4545,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 10.434,
+    "calc": 10.012,
+    "status": "OK"
+   },
+   {
+    "check": "net debt: summary vs statements",
+    "summary": 3390899968.0,
+    "calc": 3132500000.0,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.177,
+    "calc": 0.1496,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "EUROB.AT",
+  "name": "EUROBANK S.A.",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 15656127488.0,
+    "calc": 15656127856.2,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 1.4476,
+    "calc": 1.4476,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 11.7568,
+    "calc": 11.7568,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0271,
+    "calc": 0.0276,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 3.005,
+    "calc": 2.9516,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.1368,
+    "calc": 0.1282,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "KGH.WA",
+  "name": "KGHM",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 60970000384.0,
+    "calc": 60970000000.0,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 1.6505,
+    "calc": 1.6505,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 8.8542,
+    "calc": 8.8542,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.005,
+    "calc": 0.0049,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 184.705,
+    "calc": 164.14,
+    "status": "OK"
+   },
+   {
+    "check": "net debt: summary vs statements",
+    "summary": 5753999744.0,
+    "calc": 5424000000.0,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.2013,
+    "calc": 0.1123,
+    "status": "MISMATCH"
+   }
+  ]
+ },
+ {
+  "ticker": "ANDR.VI",
+  "name": "Andritz AG",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 7594906624.0,
+    "calc": 7594906535.0,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 3.2967,
+    "calc": 3.2968,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 16.5953,
+    "calc": 16.5953,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.036,
+    "calc": 0.0348,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 23.508,
+    "calc": 25.0177,
+    "status": "OK"
+   },
+   {
+    "check": "net debt: summary vs statements",
+    "summary": -615100032.0,
+    "calc": -80800000.0,
+    "status": "MISMATCH"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.207,
+    "calc": 0.1861,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "ETE.AT",
+  "name": "NATIONAL BANK OF GREECE S.A.",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 14107768832.0,
+    "calc": 14107768793.48,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 1.4531,
+    "calc": 1.4531,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 12.556,
+    "calc": 12.556,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0339,
+    "calc": 0.0331,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 10.801,
+    "calc": 10.0738,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.1222,
+    "calc": 0.1281,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "VOE.VI",
+  "name": "voestalpine AG",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 7595262464.0,
+    "calc": 7595262288.8,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 1.002,
+    "calc": 1.002,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 18.1557,
+    "calc": 18.1557,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0172,
+    "calc": 0.0169,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 44.213,
+    "calc": 44.2127,
+    "status": "OK"
+   },
+   {
+    "check": "net debt: summary vs statements",
+    "summary": 1282800128.0,
+    "calc": 1316400000.0,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.0556,
+    "calc": 0.056,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "CPS.WA",
+  "name": "CYFRPLSAT",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 8775460864.0,
+    "calc": 8775460766.485,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 0.6432,
+    "calc": 0.6432,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 24.776,
+    "calc": 24.4941,
+    "status": "OK"
+   },
+   {
+    "check": "net debt: summary vs statements",
+    "summary": 12253400576.0,
+    "calc": 12033500000.0,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": -0.1612,
+    "calc": -0.1891,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "PPC.AT",
+  "name": "P.P.C. S.A.",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 13357790208.0,
+    "calc": 13357789697.72,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 1.4475,
+    "calc": 1.4475,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 26.3059,
+    "calc": 26.3059,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.027,
+    "calc": 0.0268,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 15.447,
+    "calc": 8.6323,
+    "status": "MISMATCH"
+   },
+   {
+    "check": "net debt: summary vs statements",
+    "summary": 6436000256.0,
+    "calc": 6872143000.0,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.085,
+    "calc": 0.0572,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "RBI.VI",
+  "name": "Raiffeisen Bank Internat. AG",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 18764494848.0,
+    "calc": 18764493268.5,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 0.9432,
+    "calc": 0.9432,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 18.4355,
+    "calc": 18.4355,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0276,
+    "calc": 0.028,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 60.593,
+    "calc": 64.1961,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.0613,
+    "calc": 0.065,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "PEO.WA",
+  "name": "PEKAO",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 61916680192.0,
+    "calc": 61916681020.6,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 1.7187,
+    "calc": 1.7187,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 9.4398,
+    "calc": 9.4398,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0849,
+    "calc": 0.0838,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 137.258,
+    "calc": 134.6744,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.1875,
+    "calc": 0.1985,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "MONET.PR",
+  "name": "MONETA MONEY BANK",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 97958699008.0,
+    "calc": 97958700000.0,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 2.9857,
+    "calc": 2.9857,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 14.849,
+    "calc": 14.849,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0609,
+    "calc": 0.06,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 64.205,
+    "calc": 61.1076,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.2001,
+    "calc": 0.2082,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "DOC.VI",
+  "name": "DO & CO AG",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 2213166848.0,
+    "calc": 2213166787.0,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 4.6037,
+    "calc": 4.6037,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 20.9025,
+    "calc": 20.9025,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0125,
+    "calc": 0.0124,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 43.769,
+    "calc": 43.7685,
+    "status": "OK"
+   },
+   {
+    "check": "net debt: summary vs statements",
+    "summary": 14860000.0,
+    "calc": 14860000.0,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.267,
+    "calc": 0.22,
+    "status": "MISMATCH"
+   }
+  ]
+ },
+ {
+  "ticker": "PZU.WA",
+  "name": "PZU",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 60515692544.0,
+    "calc": 60515691840.0,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 1.6409,
+    "calc": 1.6409,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 9.6,
+    "calc": 9.6,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.069,
+    "calc": 0.0685,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 42.707,
+    "calc": 41.0771,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.1829,
+    "calc": 0.1889,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "EL.RO",
+  "name": "Electrica SA Bucuresti",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 17351157760.0,
+    "calc": 17351158504.4,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 2.3943,
+    "calc": 2.3943,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 12.9695,
+    "calc": 12.9695,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0061,
+    "calc": 0.0057,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 21.342,
+    "calc": 21.7881,
+    "status": "OK"
+   },
+   {
+    "check": "net debt: summary vs statements",
+    "summary": 4706914304.0,
+    "calc": 6140680000.0,
+    "status": "MISMATCH"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.1764,
+    "calc": 0.1648,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "OPL.WA",
+  "name": "ORANGEPL",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 18950440960.0,
+    "calc": 18950441996.76,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 1.3637,
+    "calc": 1.3637,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 22.2154,
+    "calc": 22.2154,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.042,
+    "calc": 0.0422,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 10.589,
+    "calc": 10.3051,
+    "status": "OK"
+   },
+   {
+    "check": "net debt: summary vs statements",
+    "summary": 6786999744.0,
+    "calc": 6742000000.0,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.0626,
+    "calc": 0.0563,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "UQA.VI",
+  "name": "UNIQA Insurance Group AG",
+  "checks": [
+   {
+    "check": "market cap = price x shares",
+    "summary": 5378031104.0,
+    "calc": 5378031372.72,
+    "status": "OK"
+   },
+   {
+    "check": "P/B = price / book",
+    "summary": 1.7388,
+    "calc": 1.7388,
+    "status": "OK"
+   },
+   {
+    "check": "P/E = price / EPS",
+    "summary": 12.6957,
+    "calc": 12.6957,
+    "status": "OK"
+   },
+   {
+    "check": "dividend yield",
+    "summary": 0.0414,
+    "calc": 0.0411,
+    "status": "OK"
+   },
+   {
+    "check": "book value/share vs equity/shares",
+    "summary": 10.076,
+    "calc": 9.9808,
+    "status": "OK"
+   },
+   {
+    "check": "ROE vs net income / equity",
+    "summary": 0.1381,
+    "calc": 0.1387,
+    "status": "OK"
+   }
+  ]
+ },
+ {
+  "ticker": "RICHT.BD",
+  "name": "RICHTER",
+  "checks": []
+ }
+]
