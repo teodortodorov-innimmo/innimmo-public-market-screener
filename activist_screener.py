@@ -116,6 +116,9 @@ class Company:
     fwd_pe: Optional[float] = None
     ev_ebitda: Optional[float] = None
     ps: Optional[float] = None
+    peg: Optional[float] = None            # P/E ÷ growth (course: PEG<1 = good value)
+    beta: Optional[float] = None           # risk vs market (course: "measure of risk")
+    style: str = ""                        # Value / Growth / Blend (course framework)
     div_yield: Optional[float] = None
     roe: Optional[float] = None
     oper_margin: Optional[float] = None
@@ -149,6 +152,15 @@ class Company:
     ex_div_date: str = ""
     div_pay_date: str = ""
     agm_season: str = ""
+
+    # analyst consensus (Yahoo — OTHERS' forecasts, not ours)
+    analyst_n: Optional[int] = None
+    rec_key: str = ""
+    rec_mean: Optional[float] = None
+    target_low: Optional[float] = None
+    target_mean: Optional[float] = None
+    target_high: Optional[float] = None
+    target_upside: Optional[float] = None   # mean target vs price
 
     # technicals
     sma50: Optional[float] = None
@@ -374,6 +386,7 @@ def fetch(ticker: str, fx: dict) -> Optional[Company]:
     co.fwd_pe = num(info.get("forwardPE"))
     co.ev_ebitda = num(info.get("enterpriseToEbitda"))
     co.ps = num(info.get("priceToSalesTrailing12Months"))
+    co.beta = num(info.get("beta"))
     dy = num(info.get("dividendYield"))                 # Yahoo returns percent
     co.div_yield = dy / 100.0 if dy is not None else num(info.get("trailingAnnualDividendYield"))
     co.roe = num(info.get("returnOnEquity"))
@@ -388,11 +401,19 @@ def fetch(ticker: str, fx: dict) -> Optional[Company]:
     if fcf is not None and co.market_cap:
         co.fcf_yield = fcf / co.market_cap
 
+    # PEG (course: P/E ÷ projected growth; <1 is good value). Prefer Yahoo's,
+    # else derive from trailing P/E and earnings growth.
+    co.peg = num(info.get("trailingPegRatio"), info.get("pegRatio"))
+    if co.peg is None and co.pe and co.pe > 0 and co.earn_growth and co.earn_growth > 0:
+        co.peg = co.pe / (co.earn_growth * 100)
+
     tc, td = num(info.get("totalCash")), num(info.get("totalDebt"))
     if tc is not None and td is not None:
         co.net_cash = tc - td
         if co.market_cap:
             co.net_cash_to_mktcap = co.net_cash / co.market_cap
+
+    co.style = _classify_style(co)
 
     co.control_label, _, co.control_note = ownership(ticker)
     co.control_verified = verified_date()
@@ -423,10 +444,45 @@ def fetch(ticker: str, fx: dict) -> Optional[Company]:
     co.div_pay_date = _ts_date(info.get("dividendDate"))
     co.agm_season = agm_season(co.country)
 
+    # Analyst consensus (as-reported by Yahoo). Coverage is thin for small names.
+    n_an = num(info.get("numberOfAnalystOpinions"))
+    co.analyst_n = int(n_an) if n_an else None
+    rk = info.get("recommendationKey") or ""
+    co.rec_key = "" if rk in ("", "none") else rk
+    co.rec_mean = num(info.get("recommendationMean"))
+    co.target_low = num(info.get("targetLowPrice"))
+    co.target_mean = num(info.get("targetMeanPrice"))
+    co.target_high = num(info.get("targetHighPrice"))
+    if co.target_mean and co.price:
+        co.target_upside = co.target_mean / co.price - 1
+
     _confidence(co)
     co.macro = macro_note(co.country, co.sector)
     _flag(co)
     return co
+
+
+def _classify_style(co: Company) -> str:
+    """Value / Growth / Blend, per the course's definitions.
+    Growth: fast sales/earnings, high P/E & P/S, little or no dividend.
+    Value:  low P/E & P/B, meaningful dividend yield."""
+    g = sum([
+        (co.rev_growth or 0) > 0.10,
+        (co.earn_growth or 0) > 0.10,
+        (co.pe or 0) > 20,
+        (co.ps or 0) > 3,
+        (co.div_yield is not None and co.div_yield < 0.01),
+    ])
+    v = sum([
+        (co.pb is not None and 0 < co.pb < 1.2),
+        (co.pe is not None and 0 < co.pe < 12),
+        (co.div_yield or 0) > 0.03,
+    ])
+    if g >= 3 and g > v:
+        return "Growth"
+    if v >= 2 and v > g:
+        return "Value"
+    return "Blend"
 
 
 # Fields that should normally be present; confidence = fraction available.
@@ -533,6 +589,8 @@ def score_value(co):
         if (co.ev_ebitda and co.ev_ebitda > 0 and not co.is_financial) else None,
         band(co.fcf_yield, [0, 0.04, 0.07, 0.10], [1, 2, 3, 4, 5])
         if co.fcf_yield is not None else None,
+        band(co.peg, [1.0, 1.5, 2.0, 3.0], [5, 4, 3, 2, 1])   # course: PEG<1 = good value
+        if (co.peg and co.peg > 0) else None,
     ])
     # blend absolute with sector-relative (peer) valuation when available
     return _mean([absol, co.rel_value])
@@ -722,6 +780,13 @@ def rule_based_thesis(co: Company) -> str:
                else f"relatively illiquid (~{co.days_to_5pct:.0f} sessions to build 5%)")
         s.append(f"It is {liq}.")
 
+    # Analyst consensus (others' view, clearly attributed)
+    if co.analyst_n and co.target_upside is not None:
+        rate = f", rated {co.rec_key}" if co.rec_key else ""
+        s.append(f"Separately, {co.analyst_n} analysts see fair value around "
+                 f"{co.target_mean:,.0f} ({co.target_upside*100:+.0f}% vs price){rate} "
+                 "— their forecast, not ours.")
+
     # Confidence caveat
     if co.confidence_label != "High":
         s.append(f"Data confidence is {co.confidence_label.lower()} — verify before acting.")
@@ -758,10 +823,11 @@ CSV_COLUMNS = [
     "Ticker", "Company", "Sector", "Country", "Control", "OwnershipVerified",
     "MarketCapEUR", "Score", "ScoreDelta", "Confidence", "ValueScore",
     "QualityScore", "BalanceScore", "GrowthScore", "TechnicalScore",
-    "ActionabilityScore", "UpsidePct", "PB", "PE", "EV_EBITDA", "PS",
-    "DivYield", "ROE", "NetMargin", "DebtToEquity", "RevGrowth", "FCFYield",
+    "ActionabilityScore", "UpsidePct", "Style", "PB", "PE", "PEG", "Beta",
+    "EV_EBITDA", "PS", "DivYield", "ROE", "NetMargin", "DebtToEquity", "RevGrowth", "FCFYield",
     "NetCashToMktCap", "RelValue", "Trend", "RSI14", "VolConfirm",
-    "ADV_EUR", "DaysTo5pct", "NextEarnings", "PctFromHigh", "Ret12m",
+    "ADV_EUR", "DaysTo5pct", "NextEarnings", "AnalystN", "Rating",
+    "TargetMean", "TargetUpside", "PctFromHigh", "Ret12m",
     "Support", "Resistance", "Flags", "TechRead", "Thesis",
 ]
 
@@ -780,13 +846,16 @@ def write_csv(rows, path):
                 "" if c.score_delta is None else c.score_delta,
                 c.confidence_label, s.get("value"), s.get("quality"),
                 s.get("balance"), s.get("growth"), s.get("technical"),
-                s.get("actionability"), g(c.fv_upside, True),
-                g(c.pb), g(c.pe), g(c.ev_ebitda), g(c.ps), g(c.div_yield, True),
+                s.get("actionability"), g(c.fv_upside, True), c.style,
+                g(c.pb), g(c.pe), g(c.peg), g(c.beta),
+                g(c.ev_ebitda), g(c.ps), g(c.div_yield, True),
                 g(c.roe, True), g(c.profit_margin, True), g(c.debt_to_equity),
                 g(c.rev_growth, True), g(c.fcf_yield, True),
                 g(c.net_cash_to_mktcap, True), g(c.rel_value), c.trend,
                 g(c.rsi14), "yes" if c.vol_confirm else "no",
                 g(c.adv_eur), g(c.days_to_5pct), c.next_earnings,
+                c.analyst_n if c.analyst_n else "", c.rec_key,
+                g(c.target_mean), g(c.target_upside, True),
                 g(c.pct_from_high, True), g(c.ret_12m, True), g(c.support),
                 g(c.resistance), " | ".join(c.flags), c.tech_read, c.thesis,
             ])
@@ -797,48 +866,87 @@ def write_json(rows, path):
               ensure_ascii=False, indent=1)
 
 
-# --------------------------------------------------------------------------- #
-def main() -> int:
-    log.info("Innimmo Activist Screener — universe of %d tickers", len(TICKERS))
+# Currencies the universe reports in (for the FX-to-EUR fetch).
+FX_CURRENCIES = ["PLN", "HUF", "CZK", "RON", "GBP", "USD", "BGN"]
 
-    # Pass 1: fetch FX, then every name.
-    fx = fetch_fx(["PLN", "HUF", "CZK", "RON", "GBP", "USD", "BGN"])
+
+def write_thesis(companies) -> None:
+    """Fill each company's thesis: Claude if a key is set, else rule-based."""
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        import anthropic
+        client = anthropic.Anthropic()
+        for c in companies:
+            try:
+                c.thesis = generate_thesis(client, c)
+            except Exception as exc:
+                c.thesis = f"[thesis failed: {exc}]"
+    else:
+        for c in companies:
+            c.thesis = rule_based_thesis(c)
+
+
+# --------------------------------------------------------------------------- #
+# Reusable pipeline — used by the main screen, discovery, and ticker lookup
+# --------------------------------------------------------------------------- #
+def run_pipeline(tickers, fx=None, do_history=True, log_each=False):
+    """Fetch + peer-relative value + score a list of tickers. Returns Companies."""
+    if fx is None:
+        fx = fetch_fx(FX_CURRENCIES)
     companies = []
-    for t in TICKERS:
+    for t in tickers:
         co = fetch(t, fx)
         if co:
             companies.append(co)
+            if log_each:
+                log.info("  %-9s score pending", t)
     if not companies:
-        log.error("Nothing could be screened — check network / tickers.")
-        return 1
-
-    # Pass 2: sector-relative valuation, then score everything.
+        return []
     compute_relative_value(companies)
     for co in companies:
         score(co)
+    if do_history:
+        apply_history(companies)
+    return companies
+
+
+def analyze_ticker(ticker, peers=None, fx=None):
+    """Full on-demand analysis of a single ticker. `peers` (list of Company from
+    a prior run) gives sector-relative context; without it, value is absolute
+    only. Returns a scored Company with a thesis, or None if it can't be fetched."""
+    if fx is None:
+        fx = fetch_fx(FX_CURRENCIES)
+    co = fetch(ticker.strip().upper(), fx)
+    if co is None:
+        return None
+    pool = [co] + [p for p in (peers or []) if p.sector == co.sector]
+    compute_relative_value(pool)   # populates co.rel_value / fv if ≥3 sector peers
+    score(co)
+    write_thesis([co])
+    return co
+
+
+# --------------------------------------------------------------------------- #
+def main() -> int:
+    log.info("Innimmo Activist Screener — universe of %d tickers", len(TICKERS))
+    companies = run_pipeline(TICKERS, do_history=True)
+    if not companies:
+        log.error("Nothing could be screened — check network / tickers.")
+        return 1
+    for co in companies:
         log.info("  %-9s score=%.2f  act=%s  %-13s  P/B=%s",
                  co.ticker, co.score, co.sub_scores.get("actionability"),
                  co.trend or "-", _f(co.pb))
-    apply_history(companies)
+
+    # Persist the FULL scored universe (for the Discover/Lookup peer context).
+    write_json(sorted(companies, key=lambda c: c.score, reverse=True),
+               "innimmo_universe_data.json")
 
     watch = sorted((c for c in companies if c.score >= SCORE_THRESHOLD),
                    key=lambda c: c.score, reverse=True)
     log.info("%d of %d names scored >= %.1f", len(watch), len(companies), SCORE_THRESHOLD)
-
-    if watch:
-        if os.environ.get("ANTHROPIC_API_KEY"):
-            import anthropic
-            client = anthropic.Anthropic()
-            for c in watch:
-                log.info("  thesis: %s", c.ticker)
-                try:
-                    c.thesis = generate_thesis(client, c)
-                except Exception as exc:
-                    c.thesis = f"[thesis failed: {exc}]"
-        else:
-            log.warning("ANTHROPIC_API_KEY not set — using rule-based auto-summaries.")
-            for c in watch:
-                c.thesis = rule_based_thesis(c)
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        log.warning("ANTHROPIC_API_KEY not set — using rule-based auto-summaries.")
+    write_thesis(watch)
 
     write_csv(watch, OUTPUT_CSV)
     write_json(watch, OUTPUT_JSON)

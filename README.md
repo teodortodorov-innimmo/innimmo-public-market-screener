@@ -40,7 +40,7 @@ overall make the watchlist.
 
 | Dimension | Weight | Built from |
 |---|---|---|
-| **Value** | 25% | P/B, P/E, P/S, EV/EBITDA, FCF yield — **blended with a sector-relative (peer) read** |
+| **Value** | 25% | P/B, P/E, P/S, EV/EBITDA, FCF yield, **PEG** (P/E ÷ growth; <1 = good) — **blended with a sector-relative (peer) read** |
 | **Quality** | 15% | ROE, operating margin, net margin |
 | **Balance sheet** | 10% | Net cash / cap, Debt/Equity, current ratio *(skipped for financials)* |
 | **Growth** | 10% | Revenue growth, earnings growth |
@@ -110,6 +110,53 @@ its sector** across the fetched universe (needs ≥3 peers, else skipped).
   passive-flow catalysts). Plus an **editorial AGM-season** hint per country.
   *Note: exact AGM dates and shareholder-proposal deadlines are not available
   from a free feed, so those are approximate and flagged "verify" — not invented.*
+
+## Ticker lookup (`analyze.py`)
+
+```bash
+python analyze.py KGH.WA        # any Yahoo ticker, even outside the universe
+```
+
+Runs the full six-factor analysis (score, chart technicals, ownership, ratios,
+thesis) for one ticker on demand and writes a one-name dashboard
+`analysis_<ticker>.html`. If a prior full run left `innimmo_universe_data.json`,
+its names are used as sector peers so the sector-relative value works; otherwise
+value is absolute only.
+
+## Discovery — find NEW companies (`discover.py`)
+
+```bash
+python discover.py                    # default regions, ~30 candidates each
+python discover.py pl ro --per 15     # Poland + Romania, 15 each
+python discover.py --list             # just list candidates, don't screen
+```
+
+Uses **Yahoo's free equity screener** (`EquityQuery`) to pull the listed universe
+per market (pl/at/cz/hu/ro/gr), then screens newcomers through the pipeline and
+writes `dashboard_discovered.html`. **Honest limits:** Yahoo tags US/EU mega-caps
+cross-listed on CEE exchanges with the local suffix, local currency AND
+`region=US`, so no screener field separates them — we drop them with a
+**foreign-mega-cap denylist plus a post-fetch country filter**. Results are also
+capped and patchy for small markets. Discovered names have **no curated
+ownership** yet (shown as "Ownership unknown" and flagged to verify).
+
+## Web app (`app.py`, Streamlit)
+
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+Five tabs — **Screener** (full watchlist), **Ticker lookup** (analyse any
+symbol), **Discover** (find new local names), **Watchlist** (track names with an
+optional entry price → live score + return-since-entry), **News** (recent Yahoo
+headlines for your watchlist) — behind a password gate (`APP_PASSWORD` in
+Streamlit secrets); set `ANTHROPIC_API_KEY` there too for AI theses. The screener
+result is cached ~6h with a manual "Refresh" button.
+
+Supporting modules: `watchlist.py` (local JSON persistence — ephemeral on
+Streamlit Cloud, use a DB for permanent storage) and `news.py` (Yahoo headlines;
+coverage is thin for small CEE names and some items only *mention* the company).
 
 ## Data validation (`validate.py`)
 

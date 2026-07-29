@@ -64,6 +64,11 @@ _MAP = {
     "DIGI.RO": ("Founder-controlled", 2.0, "Founder (Zoltan Teszari) majority via RCS&RDS."),
     "EL.RO":   ("State-controlled", 1.5, "Romanian state is the largest holder (~48%) (Electrica)."),
     "TGN.RO":  ("State majority", 1.0, "Romanian state ~58% (Transgaz)."),
+    "SNN.RO":  ("State majority", 1.0, "Romanian state (Ministry of Energy) ~82% (Nuclearelectrica)."),
+    "H2O.RO":  ("State majority", 1.0, "Romanian state ~80% (Hidroelectrica)."),
+    "TEL.RO":  ("State majority", 1.0, "Romanian state ~59% (Transelectrica)."),
+    "BRD.RO":  ("Foreign parent", 2.0, "Societe Generale ~60% (BRD)."),
+    "CFH.RO":  ("Family-controlled", 2.0, "Cris-Tim family holding — founder-controlled."),
     # --- Greece (Athens) ---
     "ETE.AT":  ("Widely held", 3.5, "Largely widely held after the HFSF sell-down; verify residual state stake."),
     "EUROB.AT":("Anchor shareholder", 3.0, "Fairfax is a large (~30%+) anchor holder; otherwise free float."),

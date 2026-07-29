@@ -4,3 +4,12 @@ __pycache__/
 .env
 .streamlit/secrets.toml
 *.log
+
+# generated at runtime (the app rebuilds these)
+innimmo_universe_data.json
+innimmo_discovered*.json
+innimmo_discovered*.csv
+dashboard_discovered.html
+analysis_*.json
+analysis_*.html
+watchlist.json

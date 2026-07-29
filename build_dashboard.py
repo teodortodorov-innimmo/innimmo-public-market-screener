@@ -180,6 +180,8 @@ const pctf=(v)=>v==null||v!==v?'n/a':(v*100).toFixed(1)+'%';
 const money=(v)=>{if(v==null)return 'n/a';const a=Math.abs(v);const s=v<0?'-':'';
   if(a>=1e9)return s+(a/1e9).toFixed(2)+'B';if(a>=1e6)return s+(a/1e6).toFixed(0)+'M';return s+a.toFixed(0);};
 const scoreColor=(s)=>s>=4.5?'var(--s-hi)':s>=3.5?'var(--s-mid)':'var(--s-lo)';
+const tgtpc=(t,p)=>{if(t==null||p==null||!p)return 'n/a';const v=(t/p-1)*100;
+  const col=v>=0?'var(--pos)':'var(--neg)';return `<span style="color:${col}">${v>=0?'+':''}${v.toFixed(0)}%</span>`;};
 
 function trendClass(t){return t==='Uptrend'?'trend-up':t==='Downtrend'?'trend-dn':'trend-rg';}
 
@@ -245,7 +247,7 @@ function cell(c,key){
   const s=c.sub_scores||{};
   switch(key){
     case 'co':{let d='';if(c.score_delta!=null&&c.score_delta!==0)d=`<span class="delta ${c.score_delta>0?'up':'dn'}">${c.score_delta>0?'▲':'▼'}${Math.abs(c.score_delta).toFixed(1)}</span>`;
-      return `<div class="co">${c.name}${d}</div><div class="tkr">${c.ticker} · ${c.currency||''}</div><div class="meta">${c.sector||''}${c.country?' · '+c.country:''}</div>`;}
+      return `<div class="co">${c.name}${d}</div><div class="tkr">${c.ticker} · ${c.currency||''}</div><div class="meta">${c.sector||''}${c.country?' · '+c.country:''}${c.style?' · '+c.style:''}</div>`;}
     case 'score':return `<span class="chip" style="background:${scoreColor(c.score)}">${fmt(c.score,1)}</span>`;
     case 'conf':{const cl=(c.confidence_label||'').toLowerCase();
       return `<span class="conf ${cl}">${c.confidence_label||'—'}</span>`;}
@@ -312,10 +314,21 @@ function detail(c){
         <span class="k">Index reviews</span><span class="val" style="text-align:right">${(window.__REVIEWS__||[]).map(r=>r.when).join(' · ')||'n/a'}</span>
       </div>
       <div class="macro" style="margin-top:6px"><b>AGM (editorial, verify):</b> ${c.agm_season||'—'}. Earnings/ex-div from Yahoo; index-review windows are scheduled dates.</div>
+      <h3 style="margin-top:16px">Analyst view <span style="font-weight:400;color:var(--muted);font-size:11px">(Yahoo consensus — others' forecasts, not ours)</span></h3>
+      ${c.analyst_n ? `<div class="grid2">
+        <span class="k">Rating</span><span class="val">${c.rec_key||'n/a'} · ${c.analyst_n} analysts</span>
+        <span class="k">Target low</span><span class="val">${fmt(c.target_low)} (${tgtpc(c.target_low,c.price)})</span>
+        <span class="k">Target mean</span><span class="val">${fmt(c.target_mean)} (${tgtpc(c.target_mean,c.price)})</span>
+        <span class="k">Target high</span><span class="val">${fmt(c.target_high)} (${tgtpc(c.target_high,c.price)})</span>
+        <span class="k">Our peer fair value</span><span class="val">${fmt(c.fair_value)} (${c.fv_upside==null?'—':(c.fv_upside*100).toFixed(0)+'%'})</span>
+      </div>` : `<div class="macro" style="font-style:normal">No / thin analyst coverage for this name.</div>`}
       <h3 style="margin-top:16px">Fundamentals</h3>
       <div class="grid2">
+        <span class="k">Style</span><span class="val">${c.style||'—'}</span>
         <span class="k">P/B</span><span class="val">${fmt(c.pb)}</span>
         <span class="k">P/E (fwd)</span><span class="val">${fmt(c.pe)} (${fmt(c.fwd_pe)})</span>
+        <span class="k">PEG</span><span class="val">${fmt(c.peg)}</span>
+        <span class="k">Beta (risk)</span><span class="val">${fmt(c.beta)}</span>
         <span class="k">EV/EBITDA</span><span class="val">${fmt(c.ev_ebitda)}</span>
         <span class="k">P/S</span><span class="val">${fmt(c.ps)}</span>
         <span class="k">Div yield</span><span class="val">${pctf(c.div_yield)}</span>
