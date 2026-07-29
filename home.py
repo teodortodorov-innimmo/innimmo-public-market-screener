@@ -168,6 +168,13 @@ body{margin:0}
 
 .ihome .wcard{border:1px solid var(--line);border-radius:10px;padding:11px 14px;
   margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+/* Cards are <a> links that open ?analyze=<ticker> on the top-level app. */
+.ihome a.wcard{text-decoration:none;color:inherit;cursor:pointer;
+  transition:border-color .12s ease, box-shadow .12s ease, transform .12s ease}
+.ihome a.wcard:hover{border-color:var(--accent);box-shadow:var(--shadow);
+  transform:translateY(-1px)}
+.ihome a.wcard:hover .nm{color:var(--accent)}
+.ihome a.wcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .ihome .wcard .nm{font-weight:600;font-size:15.5px}
 .ihome .wcard .tk{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
 .ihome .chip{display:inline-block;padding:3px 9px;border-radius:6px;color:#fff;
@@ -245,10 +252,12 @@ def _watchlist_html(watch_rows: list[dict]) -> str:
         ret_html = (f'<span class="{"pos" if ret >= 0 else "neg"}">{_pct(ret)} since entry</span>'
                    if ret is not None else '<span class="tk">no entry price set</span>')
         out.append(
-            f'<div class="wcard"><div><div class="nm">{r["name"]}</div>'
+            f'<a class="wcard" href="?analyze={r["ticker"]}" target="_top" '
+            f'title="Open the full analysis for {r["ticker"]}">'
+            f'<div><div class="nm">{r["name"]}</div>'
             f'<div class="tk">{r["ticker"]} · {r.get("control","")}</div></div>'
             f'<div style="text-align:right"><span class="chip" style="background:{_score_color(r.get("score"))}">{_fmt(r.get("score"),1)}</span><br>'
-            f'<span style="font-family:var(--mono);font-size:12.5px">{_fmt(r.get("price"))}</span> {ret_html}</div></div>'
+            f'<span style="font-family:var(--mono);font-size:12.5px">{_fmt(r.get("price"))}</span> {ret_html}</div></a>'
         )
     if extra > 0:
         out.append(f'<div class="empty">+{extra} more on your Watchlist tab</div>')
@@ -261,9 +270,11 @@ def _fallback_picks_html(picks: list[dict]) -> str:
     out = ['<div class="empty" style="margin-bottom:8px">Nothing on your watchlist yet — here are today\'s top screener picks to consider adding:</div>']
     for r in picks[:WATCHLIST_MAX]:
         out.append(
-            f'<div class="wcard"><div><div class="nm">{r["name"]}</div>'
+            f'<a class="wcard" href="?analyze={r["ticker"]}" target="_top" '
+            f'title="Open the full analysis for {r["ticker"]}">'
+            f'<div><div class="nm">{r["name"]}</div>'
             f'<div class="tk">{r["ticker"]}</div></div>'
-            f'<span class="chip" style="background:{_score_color(r.get("score"))}">{_fmt(r.get("score"),1)}</span></div>'
+            f'<span class="chip" style="background:{_score_color(r.get("score"))}">{_fmt(r.get("score"),1)}</span></a>'
         )
     return "".join(out)
 
@@ -342,7 +353,8 @@ def render_home(markets: dict, watch_rows: list[dict], fallback_picks: list[dict
     <div class="col-main">
       <div class="panel">
         <h2>Your Watchlist</h2>
-        <div class="sub">Whatever you add in the Watchlist tab appears here first (max {WATCHLIST_MAX} shown).</div>
+        <div class="sub">Whatever you add in the Watchlist tab appears here first
+          (max {WATCHLIST_MAX} shown) — <b>click a company to open its full analysis</b>.</div>
         {hero}
       </div>
       <div class="panel">

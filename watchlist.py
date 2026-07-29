@@ -24,10 +24,22 @@ from datetime import datetime, timezone
 
 WATCHLIST_FILE = "watchlist.json"
 
+# Names the watchlist starts with when there is no saved file yet. Because
+# Streamlit Cloud's filesystem is ephemeral, committing a watchlist.json would
+# not survive a restart — seeding here does, and the entries stay fully
+# removable from the Watchlist tab.
+DEFAULT_WATCHLIST = [
+    {"ticker": "FP.RO", "entry_price": None, "note": "Closed-end fund at a discount to NAV", "added": "seeded"},
+    {"ticker": "TLV.RO", "entry_price": None, "note": "Largest Romanian bank, widely held", "added": "seeded"},
+    {"ticker": "OTP.BD", "entry_price": None, "note": "High-ROE CEE bank, no controlling owner", "added": "seeded"},
+    {"ticker": "BG.VI", "entry_price": None, "note": "BAWAG — efficient Austrian bank, broad free float", "added": "seeded"},
+]
+
 
 def load() -> list:
     if not os.path.exists(WATCHLIST_FILE):
-        return []
+        # Copy so callers can never mutate the module-level default in place.
+        return [dict(item) for item in DEFAULT_WATCHLIST]
     try:
         return json.load(open(WATCHLIST_FILE, encoding="utf-8"))
     except Exception:

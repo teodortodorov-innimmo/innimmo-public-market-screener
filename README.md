@@ -192,7 +192,16 @@ generic market media:
   (live Yahoo quotes; Prague and WIG20 indices omitted — no reliable free ticker).
 - **Hero = your Watchlist** — whatever you add in the Watchlist tab appears here
   first, with live score, price, and return-since-entry. Falls back to today's
-  top screener picks if the watchlist is empty.
+  top screener picks if the watchlist is empty. It is **seeded** with four names
+  (`DEFAULT_WATCHLIST` in `watchlist.py`) because Streamlit Cloud's storage is
+  ephemeral — a committed `watchlist.json` wouldn't survive a restart. They're
+  fully removable from the Watchlist tab.
+- **Clicking a company opens its full analysis** inline on the Home tab (the same
+  card the Screener shows). The Home page is HTML inside a sandboxed iframe and
+  can't call back into Streamlit directly, so each card is an
+  `<a href="?analyze=TICKER" target="_top">` and `app.py` reads that query
+  param. Because some sandboxes block top-level navigation, a row of native
+  Streamlit buttons routes to the same handler as a guaranteed fallback.
 - **CEE movers & top picks** — today's best/worst movers from the fetched
   universe (simple 2-day close-to-close change, not intraday ticks) plus the
   top-scoring screener names.

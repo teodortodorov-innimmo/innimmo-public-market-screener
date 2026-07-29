@@ -249,6 +249,41 @@ with tab_home:
 
         html = home.render_home(markets, watch_rows, top_picks, movers,
                                 top_picks, news_by_theme)
+
+    # A company card on the Home page is an <a href="?analyze=TICKER">. The page
+    # is inside a sandboxed iframe and cannot call back into Streamlit directly,
+    # so the click navigates the top-level app with a query param, which we read
+    # here. Some sandboxes block target="_top", so the buttons below are a
+    # guaranteed second path to the same handler.
+    _requested = st.query_params.get("analyze")
+    if _requested:
+        st.session_state["home_analyze"] = _requested.strip().upper()
+        st.query_params.clear()   # keep the URL clean; state carries the choice
+
+    _cards = watch_rows or top_picks
+    if _cards:
+        st.caption("Open a company's full analysis — click its card below, or use these:")
+        _btn_cols = st.columns(min(len(_cards), home.WATCHLIST_MAX))
+        for _col, _row in zip(_btn_cols, _cards[:home.WATCHLIST_MAX]):
+            if _col.button(_row["ticker"], key=f"home_open_{_row['ticker']}",
+                           use_container_width=True):
+                st.session_state["home_analyze"] = _row["ticker"]
+
+    _selected = st.session_state.get("home_analyze")
+    if _selected:
+        _c1, _c2 = st.columns([5, 1])
+        _c1.markdown(f"#### Analysis — {_selected}")
+        if _c2.button("Close", key="home_close_analysis", use_container_width=True):
+            del st.session_state["home_analyze"]
+            st.rerun()
+        with st.spinner(f"Analysing {_selected}..."):
+            _ahtml, _ = analyze_one(_selected)
+        if _ahtml is None:
+            st.error(f"Could not fetch {_selected} from Yahoo Finance — check the symbol.")
+        else:
+            _embed(_ahtml, height=1500)
+        st.markdown("---")
+
     components.html(html, height=2000, scrolling=True)
 
 with tab_screen:
