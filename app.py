@@ -24,10 +24,13 @@ import activist_screener as s
 
 st.set_page_config(page_title="Innimmo Activist Screener", layout="wide")
 
-# Streamlit reserves a large default top margin above the page content; trim it
-# so the tabs sit close to the browser chrome instead of leaving a tall blank gap.
+# Streamlit reserves a large default top margin above the page content. On
+# Streamlit Community Cloud there is an additional floating viewer toolbar
+# (Share/star/edit/GitHub icons) stacked on top of the normal header, so trimming
+# too far makes the tabs overlap that toolbar instead of sitting below it. 3.5rem
+# clears both while still cutting most of the default blank gap.
 st.markdown(
-    "<style>.block-container{padding-top:1.5rem;padding-bottom:1rem}</style>",
+    "<style>.block-container{padding-top:3.5rem;padding-bottom:1rem}</style>",
     unsafe_allow_html=True,
 )
 
