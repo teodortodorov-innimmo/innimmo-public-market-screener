@@ -129,7 +129,7 @@ body{margin:0}
   --sans:Calibri,Carlito,"Segoe UI",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
   background:var(--paper);color:var(--ink);font-family:var(--sans);
-  font-size:15px;line-height:1.5;padding:4px 2px 32px;
+  font-size:17px;line-height:1.5;padding:4px 2px 32px;
 }
 @media (prefers-color-scheme:dark){.ihome{
   --paper:#13171c;--card:#1b2027;--ink:#e7eaee;--muted:#98a2ae;--line:#2a313a;
@@ -140,13 +140,13 @@ body{margin:0}
 .ihome .strip{display:flex;align-items:center;gap:14px;background:var(--card);
   border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:16px;
   overflow-x:auto;box-shadow:var(--shadow)}
-.ihome select{font-family:var(--sans);font-size:12.5px;background:transparent;
-  color:var(--ink);border:1px solid var(--line2);border-radius:7px;padding:5px 8px;
+.ihome select{font-family:var(--sans);font-size:14.5px;background:transparent;
+  color:var(--ink);border:1px solid var(--line2);border-radius:7px;padding:6px 9px;
   flex:none}
-.ihome .tick{display:flex;flex-direction:column;gap:1px;flex:none;min-width:88px}
-.ihome .tick .lb{font-size:10.5px;color:var(--muted);white-space:nowrap}
-.ihome .tick .pv{font-family:var(--mono);font-size:13px;font-weight:600;white-space:nowrap}
-.ihome .tick .pv .chg{font-size:11px;margin-left:5px}
+.ihome .tick{display:flex;flex-direction:column;gap:1px;flex:none;min-width:96px}
+.ihome .tick .lb{font-size:12px;color:var(--muted);white-space:nowrap}
+.ihome .tick .pv{font-family:var(--mono);font-size:15px;font-weight:600;white-space:nowrap}
+.ihome .tick .pv .chg{font-size:12.5px;margin-left:5px}
 .ihome .pos{color:var(--pos)}.ihome .neg{color:var(--neg)}
 
 .ihome .grid{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;align-items:start}
@@ -154,37 +154,36 @@ body{margin:0}
 .ihome .col-main{display:flex;flex-direction:column;gap:16px}
 
 .ihome .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;
-  padding:16px 18px;box-shadow:var(--shadow)}
-.ihome h2{font-family:var(--serif);font-size:16px;margin:0 0 4px}
-.ihome .sub{font-size:11.5px;color:var(--muted);margin:0 0 12px}
+  padding:18px 20px;box-shadow:var(--shadow)}
+.ihome h2{font-family:var(--serif);font-size:19px;margin:0 0 5px}
+.ihome .sub{font-size:13.5px;color:var(--muted);margin:0 0 12px}
 
-.ihome .wcard{border:1px solid var(--line);border-radius:10px;padding:10px 12px;
-  margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.ihome .wcard .nm{font-weight:600;font-size:13.5px}
-.ihome .wcard .tk{font-family:var(--mono);font-size:11px;color:var(--muted)}
-.ihome .chip{display:inline-block;padding:2px 8px;border-radius:6px;color:#fff;
-  font-weight:700;font-family:var(--mono);font-size:12px}
-.ihome .empty{font-size:13px;color:var(--muted);padding:8px 0}
+.ihome .wcard{border:1px solid var(--line);border-radius:10px;padding:11px 14px;
+  margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ihome .wcard .nm{font-weight:600;font-size:15.5px}
+.ihome .wcard .tk{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.ihome .chip{display:inline-block;padding:3px 9px;border-radius:6px;color:#fff;
+  font-weight:700;font-family:var(--mono);font-size:13.5px}
+.ihome .empty{font-size:14.5px;color:var(--muted);padding:8px 0}
 
-.ihome .moverow{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;
+.ihome .moverow{display:flex;justify-content:space-between;font-size:14.5px;padding:6px 0;
   border-bottom:1px solid var(--line)}
 .ihome .moverow:last-child{border-bottom:none}
 .ihome .moverow .tk{font-family:var(--mono)}
 
 .ihome .newscols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
 @media (max-width:900px){.ihome .newscols{grid-template-columns:1fr}}
-.ihome .newscol h3{font-size:13.5px;margin:0 0 2px;font-family:var(--serif)}
-.ihome .newscol .sub{margin-bottom:10px}
+.ihome .newscol h3{font-size:16.5px;margin:0 0 8px;font-family:var(--serif)}
 .ihome .hero-item{display:block;text-decoration:none;color:inherit;margin-bottom:12px}
-.ihome .hero-item img{width:100%;height:110px;object-fit:cover;border-radius:8px;
-  display:block;margin-bottom:7px;background:var(--track)}
-.ihome .hero-item .title{font-weight:700;font-size:13.5px;color:var(--ink);line-height:1.3}
+.ihome .hero-item img{width:100%;height:120px;object-fit:cover;border-radius:8px;
+  display:block;margin-bottom:8px;background:var(--track)}
+.ihome .hero-item .title{font-weight:700;font-size:15.5px;color:var(--ink);line-height:1.3}
 .ihome .hero-item:hover .title{color:var(--accent)}
-.ihome .newsitem{margin-bottom:10px;font-size:12.5px;padding-top:9px;border-top:1px solid var(--line)}
+.ihome .newsitem{margin-bottom:11px;font-size:14.5px;padding-top:10px;border-top:1px solid var(--line)}
 .ihome .newsitem:first-of-type{border-top:none;padding-top:0}
 .ihome .newsitem a{color:var(--ink);text-decoration:none;font-weight:600}
 .ihome .newsitem a:hover{color:var(--accent)}
-.ihome .newsitem .meta{font-size:11px;color:var(--muted);margin-top:2px}
+.ihome .newsitem .meta{font-size:12.5px;color:var(--muted);margin-top:3px}
 """
 
 JS = r"""
@@ -272,7 +271,6 @@ def _movers_html(movers: dict) -> str:
 
 
 def _news_col_html(theme: str, items: list[dict]) -> str:
-    note = NEWS_THEMES.get(theme, {}).get("note", "")
     if not items:
         body = '<div class="empty">No recent headlines found.</div>'
     else:
@@ -301,7 +299,7 @@ def _news_col_html(theme: str, items: list[dict]) -> str:
             f'<div class="meta">{n["date"]} · {n["ticker"]} · {n["publisher"]}</div></div>'
             for n in rest
         )
-    return f'<div class="newscol"><h3>{theme}</h3><div class="sub">{note}</div>{body}</div>'
+    return f'<div class="newscol"><h3>{theme}</h3>{body}</div>'
 
 
 def render_home(markets: dict, watch_rows: list[dict], fallback_picks: list[dict],
@@ -340,10 +338,6 @@ def render_home(markets: dict, watch_rows: list[dict], fallback_picks: list[dict
         {hero}
       </div>
       <div class="panel">
-        <h2>Research-vertical news</h2>
-        <div class="sub">Themed to Innimmo's active research verticals (Workstream 2, 2026
-          intern plan) — Yahoo news is per-company, not per-topic, so each column uses real
-          headlines from representative companies in that space.</div>
         <div class="newscols">{news_html}</div>
       </div>
     </div>
