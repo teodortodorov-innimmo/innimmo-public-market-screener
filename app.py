@@ -34,6 +34,17 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# App-wide font. Calibri is a Microsoft-licensed font (can't be bundled/embedded
+# legally), so it's the preferred choice with graceful fallbacks: Carlito is a
+# free, metric-compatible lookalike; then Segoe UI / system sans-serif. On
+# Windows/Office machines this renders as true Calibri; elsewhere it falls back.
+st.markdown(
+    "<style>html, body, [class*='st-'], [class*='css-'] {"
+    "font-family: Calibri, Carlito, 'Segoe UI', -apple-system, "
+    "BlinkMacSystemFont, Helvetica, Arial, sans-serif !important;}</style>",
+    unsafe_allow_html=True,
+)
+
 
 # --------------------------------------------------------------------------- #
 # Password gate. The repo is public, so the password is what keeps the actual

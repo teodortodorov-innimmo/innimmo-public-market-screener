@@ -32,8 +32,8 @@ CSS = r"""
   --s-lo:#9a6a15;--s-mid:#2f7d55;--s-hi:#17663f;--pos:#2f7d55;--neg:#9c3a48;
   --track:#eceef1;--ma50:#2f6f8f;--ma200:#b4531f;
   --shadow:0 1px 2px rgba(20,30,45,.05),0 4px 14px rgba(20,30,45,.05);
-  --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
-  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:Calibri,Carlito,"Segoe UI",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
+  --sans:Calibri,Carlito,"Segoe UI",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme:dark){:root{

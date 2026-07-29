@@ -125,8 +125,8 @@ body{margin:0}
   --line2:#d3d9df;--accent:#7d2b3a;--accent2:#7d2b3a;--pos:#2f7d55;--neg:#9c3a48;
   --track:#eceef1;--s-mid:#2f7d55;--s-lo:#9a6a15;
   --shadow:0 1px 2px rgba(20,30,45,.05),0 4px 14px rgba(20,30,45,.05);
-  --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
-  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --serif:Calibri,Carlito,"Segoe UI",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
+  --sans:Calibri,Carlito,"Segoe UI",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
   background:var(--paper);color:var(--ink);font-family:var(--sans);
   font-size:15px;line-height:1.5;padding:4px 2px 32px;
