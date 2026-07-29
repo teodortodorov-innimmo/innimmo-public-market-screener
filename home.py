@@ -104,6 +104,14 @@ def movers(tickers: list[str], top_n: int = 5) -> dict:
     return {"gainers": moves[:top_n], "losers": moves[-top_n:][::-1] if moves else []}
 
 
+# Back-compat alias. Streamlit re-runs the main script on every interaction but
+# leaves already-imported modules cached in sys.modules, so on a deploy that
+# renames a function the app can transiently see the OLD module while running the
+# NEW app.py — which is exactly how `cee_movers` -> `movers` broke the Home tab.
+# Keeping both names bound means neither direction can fail mid-deploy.
+cee_movers = movers
+
+
 def news_for_theme(theme: str, per_ticker: int = 3, total: int = 6) -> list[dict]:
     import news
     cfg = NEWS_THEMES.get(theme)

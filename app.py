@@ -193,7 +193,10 @@ def home_movers_and_picks():
         except Exception:
             uni = []
     import home
-    movers = home.movers([c["ticker"] for c in uni], top_n=5)
+    # Resolve the function defensively: a hot-reloaded app.py can still be paired
+    # with a stale cached `home` module, where only the old name exists.
+    movers_fn = getattr(home, "movers", None) or getattr(home, "cee_movers")
+    movers = movers_fn([c["ticker"] for c in uni], top_n=5)
     top_picks = sorted(picks, key=lambda c: c["score"], reverse=True)[:5]
     return movers, top_picks
 
