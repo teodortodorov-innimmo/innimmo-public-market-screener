@@ -276,7 +276,16 @@ def _news_col_html(theme: str, items: list[dict]) -> str:
     if not items:
         body = '<div class="empty">No recent headlines found.</div>'
     else:
-        head, rest = items[0], items[1:]
+        # Prefer the most recent item that actually HAS an image for the hero
+        # slot — not every article carries a thumbnail, so pinning to items[0]
+        # meant the picture was often missing even when a later item had one.
+        img_idx = next((i for i, it in enumerate(items) if it.get("image")), None)
+        if img_idx is not None:
+            head = items[img_idx]
+            rest = items[:img_idx] + items[img_idx + 1:]
+        else:
+            head, rest = items[0], items[1:]
+        rest = rest[:3]   # keep the column to 1 hero + 3 text rows, Yahoo-style
         if head.get("image"):
             body = (f'<a class="hero-item" href="{head["url"]}" target="_blank" rel="noopener">'
                     f'<img src="{head["image"]}" alt="" loading="lazy">'

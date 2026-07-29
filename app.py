@@ -190,7 +190,9 @@ def home_movers_and_picks():
 @st.cache_data(ttl=30 * 60, show_spinner=False)
 def home_research_news():
     import home
-    return {t: home.news_for_theme(t, total=4) for t in home.NEWS_THEMES}
+    # Fetch a larger pool than we display so there's a good chance at least one
+    # item per theme has a thumbnail image (not every article carries one).
+    return {t: home.news_for_theme(t, per_ticker=4, total=10) for t in home.NEWS_THEMES}
 
 
 # --------------------------------------------------------------------------- #
