@@ -7,7 +7,7 @@ instead of generic market media:
 
   - Market strip: Europe / US / Crypto / Commodities / Currencies, switchable.
   - Hero: YOUR watchlist (falls back to top screener picks if empty).
-  - Right rail: today's CEE movers (from the universe) + top screener picks.
+  - Right rail: today's biggest movers (from the universe) + top screener picks.
   - News: three columns themed to Innimmo's actual research verticals, per
     Workstream 2 (Market & Competitive Research) in the 2026 intern plan —
     Data Centres & Cooling (T-RES-23), Energy & Battery Storage (T-RES-2,
@@ -81,7 +81,7 @@ def market_snapshot(group: str) -> list[dict]:
     return out
 
 
-def cee_movers(tickers: list[str], top_n: int = 5) -> dict:
+def movers(tickers: list[str], top_n: int = 5) -> dict:
     """Today's best/worst movers among a ticker list (2-day close-to-close)."""
     if not tickers:
         return {"gainers": [], "losers": []}
@@ -342,7 +342,7 @@ def render_home(markets: dict, watch_rows: list[dict], fallback_picks: list[dict
       </div>
     </div>
     <div class="panel">
-      <h2>CEE movers &amp; top picks</h2>
+      <h2>European movers &amp; top picks</h2>
       <div class="sub">From today's universe — not investment advice.</div>
       {_movers_html(movers)}
       <div class="sub" style="margin-top:14px;margin-bottom:6px">Top screener picks</div>

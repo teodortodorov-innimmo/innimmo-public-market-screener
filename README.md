@@ -5,7 +5,9 @@ Methodology & User Guide — **v4**
 **New in v4:** data-**confidence** score, **liquidity** (avg daily value + days to
 build a 5% stake), **peer-implied fair value / upside %**, **ownership
 verified-dates** with staleness flags, a **rule-based auto-thesis** when no API
-key is set, a wider **46-name** universe (adds Bucharest & Athens), and a
+key is set, a **134-name** pan-European universe (18 markets — CEE plus Germany,
+France, Italy, Spain, Netherlands, Belgium, Portugal, Sweden, Denmark, Finland,
+UK and Ireland), and a
 **technical-score backtest** (`backtest.py`).
 
 Pulls **live** data for a universe of CEE / European listings from Yahoo Finance,
@@ -79,8 +81,15 @@ its sector** across the fetched universe (needs ≥3 peers, else skipped).
 
 ## Other features
 
-- **EUR-normalised market caps** — sizes are comparable across PLN/HUF/CZK/RON/EUR
-  (live FX with a hardcoded fallback if the FX fetch fails).
+- **EUR-normalised market caps** — sizes are comparable across
+  PLN/HUF/CZK/RON/SEK/DKK/GBP/EUR (live FX with a hardcoded fallback if the FX
+  fetch fails).
+  > **GBp gotcha:** LSE-listed names quote *price* in **pence** (`GBp`) while
+  > *aggregate* fields (market cap, cash, debt, FCF) are already in **pounds** —
+  > a 100× mismatch. Ratios (P/E, P/B, ROE…) are scale-invariant so they're
+  > unaffected, but any price×volume figure needs the ÷100 correction, which
+  > `fetch()` applies. Without it, Shell's daily traded value would read €35.8bn
+  > instead of the correct ≈€358m.
 - **Data-confidence score** — each name gets a High/Medium/Low confidence from how
   complete its data is; thin names (e.g. missing fundamentals) are flagged so a
   score built on partial data isn't mistaken for a solid one.
@@ -132,13 +141,32 @@ python discover.py --list             # just list candidates, don't screen
 ```
 
 Uses **Yahoo's free equity screener** (`EquityQuery`) to pull the listed universe
-per market (pl/at/cz/hu/ro/gr), then screens newcomers through the pipeline and
-writes `dashboard_discovered.html`. **Honest limits:** Yahoo tags US/EU mega-caps
-cross-listed on CEE exchanges with the local suffix, local currency AND
-`region=US`, so no screener field separates them — we drop them with a
-**foreign-mega-cap denylist plus a post-fetch country filter**. Results are also
-capped and patchy for small markets. Discovered names have **no curated
-ownership** yet (shown as "Ownership unknown" and flagged to verify).
+per market — 18 supported: `pl at cz hu ro gr de fr it es nl be pt se dk fi gb ie`
+— then screens newcomers through the pipeline and
+writes `dashboard_discovered.html`. **Honest limits:**
+
+- Yahoo tags US/EU mega-caps cross-listed on local exchanges with the local
+  suffix, local currency AND `region=US`, so no screener field separates them —
+  we drop them with a **foreign-mega-cap denylist plus a post-fetch country
+  filter**. The denylist applies only to the original CEE markets it was tuned
+  against; elsewhere it would wrongly strip genuine home-market blue chips
+  (e.g. `SAP` is denied on Budapest but `SAP.DE` is SAP's real home listing).
+- **German discovery surfaces fewer names than expected:** German equities list
+  on several regional venues (`.F` Frankfurt, `.SG` Stuttgart, `.MU`, `.BE`) and
+  we filter to `.DE` (Xetra, the primary/most liquid) to avoid the same company
+  appearing five times. Correct, but not exhaustive.
+- Results are capped per market and patchy for small markets. Discovered names
+  have **no curated ownership** yet (shown as "Ownership unknown", flagged to verify).
+
+### Known dead / renamed symbols (handled)
+
+| Intended | Status |
+|---|---|
+| `KRKG.LJ`, `POSR.LJ`, `ZVTG.LJ` | Ljubljana has no usable Yahoo feed. Krka reached via its Vienna cross-listing (`KRKG.VI`); NLB and Zavarovalnica Triglav omitted. |
+| `OTE.AT` | Trades as **`HTO.AT`** (Hellenic Telecom). |
+| `MYTIL.AT` | Renamed **Metlen** — now **`MTLN.AT`**. |
+| `OPAP.AT` | Absorbed into Allwyn AG; no live Athens listing (only a US OTC ADR of a different entity), so omitted. |
+| `WIG20`, `^PX` (Prague) index | No reliable free Yahoo history — omitted from the Home market strip. |
 
 ## Web app (`app.py`, Streamlit)
 

@@ -175,7 +175,7 @@ def home_markets():
 
 @st.cache_data(ttl=60 * 60, show_spinner=False)
 def home_movers_and_picks():
-    """CEE movers use the full fetched universe if a prior full run left one;
+    """Movers use the full fetched universe if a prior full run left one;
     top picks come from the passing watchlist."""
     import json
     picks = []
@@ -193,7 +193,7 @@ def home_movers_and_picks():
         except Exception:
             uni = []
     import home
-    movers = home.cee_movers([c["ticker"] for c in uni], top_n=5)
+    movers = home.movers([c["ticker"] for c in uni], top_n=5)
     top_picks = sorted(picks, key=lambda c: c["score"], reverse=True)[:5]
     return movers, top_picks
 
@@ -274,11 +274,16 @@ with tab_discover:
     st.caption("Pulls the universe from Yahoo's free screener, drops foreign "
                "cross-listings, and scores newcomers. Coverage of small markets "
                "is best-effort; discovered names have no curated ownership yet.")
+    _market_labels = {
+        "pl": "Poland", "at": "Austria", "cz": "Czechia", "hu": "Hungary",
+        "ro": "Romania", "gr": "Greece", "de": "Germany", "fr": "France",
+        "it": "Italy", "es": "Spain", "nl": "Netherlands", "be": "Belgium",
+        "pt": "Portugal", "se": "Sweden", "dk": "Denmark", "fi": "Finland",
+        "gb": "United Kingdom", "ie": "Ireland",
+    }
     regions = st.multiselect(
-        "Markets", options=["pl", "at", "cz", "hu", "ro", "gr"],
-        default=["pl", "ro"],
-        format_func=lambda c: {"pl": "Poland", "at": "Austria", "cz": "Czechia",
-                               "hu": "Hungary", "ro": "Romania", "gr": "Greece"}[c])
+        "Markets", options=list(_market_labels), default=["pl", "ro"],
+        format_func=lambda c: _market_labels[c])
     per_region = st.slider("Candidates per market", 5, 40, 15)
     if st.button("Run discovery") and regions:
         with st.spinner("Discovering and scoring — this can take a few minutes..."):

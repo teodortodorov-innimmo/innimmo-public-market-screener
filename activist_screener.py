@@ -70,21 +70,59 @@ DIMENSION_WEIGHTS = {
 # Fallback EUR FX rates (units of local currency per 1 EUR) if live fetch fails.
 # Approximate, 2026-07 — used only as a backstop; refresh periodically.
 FX_FALLBACK = {"EUR": 1.0, "PLN": 4.30, "HUF": 395.0, "CZK": 25.0, "RON": 4.97,
-               "GBP": 0.84, "USD": 1.08, "BGN": 1.96}
+               "GBP": 0.84, "USD": 1.08, "BGN": 1.96, "SEK": 11.0, "DKK": 7.46}
 
 TICKERS: list[str] = [
+    # Poland — Warsaw
     "PKO.WA", "PKN.WA", "KGH.WA", "PZU.WA", "PGE.WA", "PEO.WA", "DNP.WA",
     "CDR.WA", "LPP.WA", "ALE.WA", "CPS.WA", "JSW.WA", "OPL.WA", "KTY.WA",
     "BDX.WA",
+    # Austria — Vienna
     "EBS.VI", "OMV.VI", "VOE.VI", "RBI.VI", "VER.VI", "WIE.VI", "ANDR.VI",
     "BG.VI", "DOC.VI", "LNZ.VI", "UQA.VI", "POST.VI", "MMK.VI",
+    # Czechia — Prague
     "CEZ.PR", "KOMB.PR", "MONET.PR",
+    # Hungary — Budapest
     "OTP.BD", "MOL.BD", "RICHT.BD", "MTEL.BD",
-    "KRKG.LJ", "POSR.LJ", "ZVTG.LJ",
+    # Slovenia — Ljubljana has no usable Yahoo feed (KRKG/POSR/ZVTG.LJ all 404
+    # or return no price). Krka is reachable via its Vienna cross-listing; NLB
+    # and Zavarovalnica Triglav have no working symbol on any exchange, so they
+    # are omitted rather than left as guaranteed-failing fetches every run.
+    "KRKG.VI",
     # Romania — Bucharest
     "TLV.RO", "SNP.RO", "SNG.RO", "DIGI.RO", "EL.RO", "FP.RO", "TGN.RO",
-    # Greece — Athens
-    "ETE.AT", "EUROB.AT", "TPEIR.AT", "OPAP.AT", "OTE.AT", "MYTIL.AT", "PPC.AT",
+    # Greece — Athens. Note: OTE trades as HTO.AT, and Mytilineos renamed itself
+    # Metlen (MTLN.AT). OPAP is omitted — it was absorbed into Allwyn AG and no
+    # longer has a live Athens listing (only a US OTC ADR of a different entity).
+    "ETE.AT", "EUROB.AT", "TPEIR.AT", "HTO.AT", "MTLN.AT", "PPC.AT",
+    # Germany — Xetra
+    "SAP.DE", "ALV.DE", "SIE.DE", "DTE.DE", "BAS.DE", "BMW.DE", "VOW3.DE",
+    "MBG.DE", "DBK.DE", "MUV2.DE",
+    # France — Paris
+    "MC.PA", "OR.PA", "SAN.PA", "BNP.PA", "AIR.PA", "TTE.PA", "SU.PA",
+    "DG.PA", "CS.PA", "ENGI.PA",
+    # Italy — Milan
+    "ENEL.MI", "ENI.MI", "ISP.MI", "UCG.MI", "G.MI", "STLAM.MI", "TIT.MI", "RACE.MI",
+    # Spain — Madrid
+    "SAN.MC", "ITX.MC", "IBE.MC", "BBVA.MC", "TEF.MC", "REP.MC", "AENA.MC",
+    # Netherlands — Amsterdam
+    "ASML.AS", "INGA.AS", "AD.AS", "PHIA.AS", "ADYEN.AS", "WKL.AS",
+    # Belgium — Brussels
+    "ABI.BR", "KBC.BR", "UCB.BR", "SOLB.BR",
+    # Portugal — Lisbon
+    "EDP.LS", "GALP.LS", "JMT.LS",
+    # Sweden — Stockholm
+    "ERIC-B.ST", "VOLV-B.ST", "ATCO-A.ST", "HM-B.ST", "SEB-A.ST",
+    "SWED-A.ST", "SAND.ST", "INVE-B.ST",
+    # Denmark — Copenhagen
+    "NOVO-B.CO", "DSV.CO", "ORSTED.CO", "MAERSK-B.CO", "CARL-B.CO", "VWS.CO",
+    # Finland — Helsinki
+    "NOKIA.HE", "NESTE.HE", "KNEBV.HE", "SAMPO.HE", "UPM.HE",
+    # United Kingdom — London (prices in GBp/pence — see the fetch() note)
+    "SHEL.L", "AZN.L", "HSBA.L", "ULVR.L", "BP.L", "GSK.L", "DGE.L", "RIO.L",
+    "BATS.L", "VOD.L", "BARC.L", "LLOY.L", "NWG.L", "STAN.L",
+    # Ireland — Dublin
+    "RYA.IR", "KRZ.IR", "BIRG.IR", "PTSB.IR",
 ]
 
 FINANCIAL_SECTORS = {"Financial Services", "Financial", "Insurance"}
@@ -373,7 +411,15 @@ def fetch(ticker: str, fx: dict) -> Optional[Company]:
     co.price = num(info.get("currentPrice"), info.get("regularMarketPrice"),
                    info.get("previousClose"))
     co.market_cap = num(info.get("marketCap"))
-    rate = fx.get(co.currency) or FX_FALLBACK.get(co.currency)
+    # LSE-listed names quote price/EPS/book-value-per-share in PENCE (currency
+    # "GBp"/"GBX") but aggregate fields (marketCap, totalCash, totalDebt, FCF)
+    # are already in POUNDS — a 100x mismatch if not handled. Ratios (P/E, P/B,
+    # dividend yield, ROE...) are scale-invariant so they're unaffected; only
+    # price-times-volume calculations (liquidity) need the /100 correction.
+    is_gbx = co.currency in ("GBp", "GBX")
+    fx_currency = "GBP" if is_gbx else co.currency
+    price_divisor = 100.0 if is_gbx else 1.0
+    rate = fx.get(fx_currency) or FX_FALLBACK.get(fx_currency)
     if co.market_cap and rate:
         co.market_cap_eur = co.market_cap / rate
 
@@ -428,7 +474,7 @@ def fetch(ticker: str, fx: dict) -> Optional[Company]:
     # Liquidity: average daily traded value in EUR, and sessions to build a 5%
     # stake assuming you can be ~20% of daily volume without moving the price.
     if co.vol_avg and co.price and rate:
-        co.adv_eur = co.vol_avg * co.price / rate
+        co.adv_eur = co.vol_avg * (co.price / price_divisor) / rate
         if co.market_cap_eur and co.adv_eur > 0:
             co.days_to_5pct = (0.05 * co.market_cap_eur) / (0.20 * co.adv_eur)
 
@@ -867,7 +913,7 @@ def write_json(rows, path):
 
 
 # Currencies the universe reports in (for the FX-to-EUR fetch).
-FX_CURRENCIES = ["PLN", "HUF", "CZK", "RON", "GBP", "USD", "BGN"]
+FX_CURRENCIES = ["PLN", "HUF", "CZK", "RON", "GBP", "USD", "BGN", "SEK", "DKK"]
 
 
 def write_thesis(companies) -> None:

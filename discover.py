@@ -29,23 +29,39 @@ import activist_screener as s
 
 # Yahoo region code -> expected local exchange suffix.
 REGION_SUFFIX = {
-    "pl": ".WA", "at": ".VI", "cz": ".PR",
-    "hu": ".BD", "ro": ".RO", "gr": ".AT",
+    "pl": ".WA", "at": ".VI", "cz": ".PR", "hu": ".BD", "ro": ".RO", "gr": ".AT",
+    "de": ".DE", "fr": ".PA", "it": ".MI", "es": ".MC", "nl": ".AS", "be": ".BR",
+    "pt": ".LS", "se": ".ST", "dk": ".CO", "fi": ".HE", "gb": ".L", "ie": ".IR",
 }
 # ...and the country the listing should actually be in — to drop US/foreign
 # mega-caps that are merely cross-listed locally (e.g. NVDA.WA, VISA.WA).
+# NOTE: Airbus (AIR.PA) and Stellantis (STLAM.MI) are genuinely incorporated in
+# the Netherlands despite trading in Paris/Milan — that's correct, not a bug;
+# they just won't show up under a Netherlands-region discovery scan.
 REGION_COUNTRY = {
     "pl": {"Poland"}, "at": {"Austria"}, "cz": {"Czechia", "Czech Republic"},
     "hu": {"Hungary"}, "ro": {"Romania"}, "gr": {"Greece"},
+    "de": {"Germany"}, "fr": {"France"}, "it": {"Italy"}, "es": {"Spain"},
+    "nl": {"Netherlands"}, "be": {"Belgium"}, "pt": {"Portugal"},
+    "se": {"Sweden"}, "dk": {"Denmark"}, "fi": {"Finland"},
+    "gb": {"United Kingdom"}, "ie": {"Ireland"},
 }
-DEFAULT_REGIONS = list(REGION_SUFFIX)
+# The original CEE markets, where FOREIGN_DENY below was tuned against real
+# cross-listing noise (see discover_tickers). Applying that same denylist to
+# the newer markets would wrongly strip their OWN home-market blue chips —
+# e.g. "SAP" is denied because it showed up cross-listed on Budapest, but SAP.DE
+# is SAP's real home listing. For markets outside this set we rely solely on
+# the post-fetch country check (REGION_COUNTRY), which is the reliable backstop.
+CEE_LEGACY_REGIONS = {"pl", "at", "cz", "hu", "ro", "gr"}
+DEFAULT_REGIONS = ["pl", "at", "cz", "hu", "ro", "gr"]
 MCAP_FLOOR = 3e8          # skip micro-caps (local currency)
 
 
 # Yahoo tags many US/EU mega-caps cross-listed on CEE exchanges with the local
 # suffix, local currency, AND region=US — so no screener field distinguishes them.
 # They also dwarf real local names by market cap and crowd them out. We strip the
-# common offenders cheaply here; the post-fetch country filter is the real backstop.
+# common offenders cheaply here (CEE_LEGACY_REGIONS only); the post-fetch country
+# filter is the real backstop everywhere else.
 FOREIGN_DENY = {
     "AAPL", "MSFT", "NVDA", "GOOG", "GOOGL", "AMZN", "META", "TSLA", "ORCL",
     "ADBE", "INTC", "AMD", "NFLX", "PYPL", "VISA", "V", "MA", "PG", "PCGL",
@@ -82,10 +98,13 @@ def discover_tickers(regions=None, per_region=30, mcap_floor=MCAP_FLOOR, exclude
         except Exception as exc:
             print(f"  {code}: screener failed ({exc})")
             continue
-        # local suffix, not an obvious foreign cross-listing, largest first
+        # local suffix, not an obvious foreign cross-listing, largest first.
+        # FOREIGN_DENY only applies to the legacy CEE markets it was tuned for —
+        # elsewhere it would wrongly strip genuine home-market blue chips.
+        apply_deny = code in CEE_LEGACY_REGIONS
         local = [x for x in quotes
                  if str(x.get("symbol", "")).endswith(suffix)
-                 and x.get("symbol", "").split(".")[0].upper() not in FOREIGN_DENY]
+                 and (not apply_deny or x.get("symbol", "").split(".")[0].upper() not in FOREIGN_DENY)]
         local.sort(key=lambda x: x.get("marketCap") or 0, reverse=True)
         picks = [x["symbol"] for x in local
                  if x["symbol"] not in exclude][:per_region]
