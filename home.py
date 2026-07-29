@@ -149,8 +149,9 @@ body{margin:0}
 .ihome .tick .pv .chg{font-size:11px;margin-left:5px}
 .ihome .pos{color:var(--pos)}.ihome .neg{color:var(--neg)}
 
-.ihome .grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:18px}
+.ihome .grid{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;align-items:start}
 @media (max-width:820px){.ihome .grid{grid-template-columns:1fr}}
+.ihome .col-main{display:flex;flex-direction:column;gap:16px}
 
 .ihome .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;
   padding:16px 18px;box-shadow:var(--shadow)}
@@ -170,9 +171,17 @@ body{margin:0}
 .ihome .moverow:last-child{border-bottom:none}
 .ihome .moverow .tk{font-family:var(--mono)}
 
-.ihome .newscols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.ihome .newscols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
 @media (max-width:900px){.ihome .newscols{grid-template-columns:1fr}}
-.ihome .newsitem{margin-bottom:11px;font-size:13px}
+.ihome .newscol h3{font-size:13.5px;margin:0 0 2px;font-family:var(--serif)}
+.ihome .newscol .sub{margin-bottom:10px}
+.ihome .hero-item{display:block;text-decoration:none;color:inherit;margin-bottom:12px}
+.ihome .hero-item img{width:100%;height:110px;object-fit:cover;border-radius:8px;
+  display:block;margin-bottom:7px;background:var(--track)}
+.ihome .hero-item .title{font-weight:700;font-size:13.5px;color:var(--ink);line-height:1.3}
+.ihome .hero-item:hover .title{color:var(--accent)}
+.ihome .newsitem{margin-bottom:10px;font-size:12.5px;padding-top:9px;border-top:1px solid var(--line)}
+.ihome .newsitem:first-of-type{border-top:none;padding-top:0}
 .ihome .newsitem a{color:var(--ink);text-decoration:none;font-weight:600}
 .ihome .newsitem a:hover{color:var(--accent)}
 .ihome .newsitem .meta{font-size:11px;color:var(--muted);margin-top:2px}
@@ -216,11 +225,15 @@ def _score_color(s):
     return "var(--s-mid)" if s >= 3.5 else "var(--s-lo)"
 
 
+WATCHLIST_MAX = 4
+
+
 def _watchlist_html(watch_rows: list[dict]) -> str:
     if not watch_rows:
         return '<div class="empty">Your watchlist is empty — add a ticker in the Watchlist tab and it will show up here.</div>'
+    extra = len(watch_rows) - WATCHLIST_MAX
     out = []
-    for r in watch_rows:
+    for r in watch_rows[:WATCHLIST_MAX]:
         ret = r.get("ret_pct")
         ret_html = (f'<span class="{"pos" if ret >= 0 else "neg"}">{_pct(ret)} since entry</span>'
                    if ret is not None else '<span class="tk">no entry price set</span>')
@@ -230,6 +243,8 @@ def _watchlist_html(watch_rows: list[dict]) -> str:
             f'<div style="text-align:right"><span class="chip" style="background:{_score_color(r.get("score"))}">{_fmt(r.get("score"),1)}</span><br>'
             f'<span style="font-family:var(--mono);font-size:12.5px">{_fmt(r.get("price"))}</span> {ret_html}</div></div>'
         )
+    if extra > 0:
+        out.append(f'<div class="empty">+{extra} more on your Watchlist tab</div>')
     return "".join(out)
 
 
@@ -237,7 +252,7 @@ def _fallback_picks_html(picks: list[dict]) -> str:
     if not picks:
         return '<div class="empty">No screener data yet — run the Screener tab first.</div>'
     out = ['<div class="empty" style="margin-bottom:8px">Nothing on your watchlist yet — here are today\'s top screener picks to consider adding:</div>']
-    for r in picks:
+    for r in picks[:WATCHLIST_MAX]:
         out.append(
             f'<div class="wcard"><div><div class="nm">{r["name"]}</div>'
             f'<div class="tk">{r["ticker"]}</div></div>'
@@ -261,13 +276,23 @@ def _news_col_html(theme: str, items: list[dict]) -> str:
     if not items:
         body = '<div class="empty">No recent headlines found.</div>'
     else:
-        body = "".join(
+        head, rest = items[0], items[1:]
+        if head.get("image"):
+            body = (f'<a class="hero-item" href="{head["url"]}" target="_blank" rel="noopener">'
+                    f'<img src="{head["image"]}" alt="" loading="lazy">'
+                    f'<div class="title">{head["title"]}</div>'
+                    f'<div class="meta">{head["date"]} · {head["ticker"]} · {head["publisher"]}</div></a>')
+        else:
+            body = (f'<div class="newsitem" style="border-top:none;padding-top:0">'
+                    f'<a href="{head["url"]}" target="_blank" rel="noopener">{head["title"]}</a>'
+                    f'<div class="meta">{head["date"]} · {head["ticker"]} · {head["publisher"]}</div></div>')
+        body += "".join(
             f'<div class="newsitem">'
             f'<a href="{n["url"]}" target="_blank" rel="noopener">{n["title"]}</a>'
             f'<div class="meta">{n["date"]} · {n["ticker"]} · {n["publisher"]}</div></div>'
-            for n in items
+            for n in rest
         )
-    return f'<div><h2 style="font-size:14.5px">{theme}</h2><div class="sub">{note}</div>{body}</div>'
+    return f'<div class="newscol"><h3>{theme}</h3><div class="sub">{note}</div>{body}</div>'
 
 
 def render_home(markets: dict, watch_rows: list[dict], fallback_picks: list[dict],
@@ -299,10 +324,19 @@ def render_home(markets: dict, watch_rows: list[dict], fallback_picks: list[dict
   </div>
 
   <div class="grid">
-    <div class="panel">
-      <h2>Your Watchlist</h2>
-      <div class="sub">Whatever you add in the Watchlist tab appears here first.</div>
-      {hero}
+    <div class="col-main">
+      <div class="panel">
+        <h2>Your Watchlist</h2>
+        <div class="sub">Whatever you add in the Watchlist tab appears here first (max {WATCHLIST_MAX} shown).</div>
+        {hero}
+      </div>
+      <div class="panel">
+        <h2>Research-vertical news</h2>
+        <div class="sub">Themed to Innimmo's active research verticals (Workstream 2, 2026
+          intern plan) — Yahoo news is per-company, not per-topic, so each column uses real
+          headlines from representative companies in that space.</div>
+        <div class="newscols">{news_html}</div>
+      </div>
     </div>
     <div class="panel">
       <h2>CEE movers &amp; top picks</h2>
@@ -311,14 +345,6 @@ def render_home(markets: dict, watch_rows: list[dict], fallback_picks: list[dict
       <div class="sub" style="margin-top:14px;margin-bottom:6px">Top screener picks</div>
       {top_picks_html}
     </div>
-  </div>
-
-  <div class="panel">
-    <h2>Research-vertical news</h2>
-    <div class="sub">Themed to Innimmo's active research verticals (Workstream 2, 2026 intern
-      plan) — Yahoo news is per-company, not per-topic, so each column uses real headlines
-      from representative companies in that space.</div>
-    <div class="newscols">{news_html}</div>
   </div>
 </div>
 <script>{js}</script>"""

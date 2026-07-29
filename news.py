@@ -24,6 +24,17 @@ def _content(item):
     return item.get("content", item)  # yfinance 1.x nests under 'content'
 
 
+def _thumbnail(content: dict) -> str:
+    """Smallest non-original thumbnail URL, else the original, else ''."""
+    thumb = content.get("thumbnail")
+    if not isinstance(thumb, dict):
+        return ""
+    for r in thumb.get("resolutions") or []:
+        if r.get("tag") != "original" and r.get("url"):
+            return r["url"]
+    return thumb.get("originalUrl", "") or ""
+
+
 def get_news(tickers, per_ticker=6, total=30):
     """Return [{ticker,title,url,publisher,date}] newest-first."""
     out, seen = [], set()
@@ -43,8 +54,9 @@ def get_news(tickers, per_ticker=6, total=30):
             prov = c.get("provider") or {}
             publisher = prov.get("displayName", "") if isinstance(prov, dict) else ""
             date = str(c.get("pubDate") or c.get("displayTime") or "")[:10]
+            image = _thumbnail(c)
             out.append({"ticker": t, "title": title, "url": url,
-                        "publisher": publisher, "date": date})
+                        "publisher": publisher, "date": date, "image": image})
     out.sort(key=lambda x: x["date"], reverse=True)
     return out[:total]
 

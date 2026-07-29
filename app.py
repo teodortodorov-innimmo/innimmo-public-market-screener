@@ -24,6 +24,13 @@ import activist_screener as s
 
 st.set_page_config(page_title="Innimmo Activist Screener", layout="wide")
 
+# Streamlit reserves a large default top margin above the page content; trim it
+# so the tabs sit close to the browser chrome instead of leaving a tall blank gap.
+st.markdown(
+    "<style>.block-container{padding-top:1.5rem;padding-bottom:1rem}</style>",
+    unsafe_allow_html=True,
+)
+
 
 # --------------------------------------------------------------------------- #
 # Password gate. The repo is public, so the password is what keeps the actual
