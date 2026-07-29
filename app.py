@@ -3,9 +3,13 @@
 Streamlit app for the Innimmo Activist Screener (T-AI-10).
 
 Tabs:
-  - Screener      : the full CEE/European six-factor watchlist (cached, ~6h)
-  - Ticker lookup : analyse ANY Yahoo ticker on demand
-  - Discover      : find NEW local companies via Yahoo's free screener
+  - Home       : personal front page — your watchlist, EU/US/Crypto/Commodities/
+                 Currencies market strip, CEE movers, and research-vertical news
+  - Screener   : the full CEE/European six-factor watchlist (cached, ~6h),
+                 with a quick ticker-lookup box at the top
+  - Discover   : find NEW local companies via Yahoo's free screener
+  - Watchlist  : track names with an optional entry price
+  - News       : recent Yahoo headlines for your watchlist
 
 Reuses the existing pipeline in activist_screener.py — no scoring/rendering
 logic is duplicated here. Internal research tool, NOT investment advice.
@@ -142,6 +146,43 @@ def news_for(tickers: tuple):
     return news.get_news(list(tickers))
 
 
+@st.cache_data(ttl=15 * 60, show_spinner=False)
+def home_markets():
+    import home
+    return {g: home.market_snapshot(g) for g in home.MARKET_GROUPS}
+
+
+@st.cache_data(ttl=60 * 60, show_spinner=False)
+def home_movers_and_picks():
+    """CEE movers use the full fetched universe if a prior full run left one;
+    top picks come from the passing watchlist."""
+    import json
+    picks = []
+    if os.path.exists("innimmo_watchlist_data.json"):
+        try:
+            picks = json.load(open("innimmo_watchlist_data.json", encoding="utf-8"))
+        except Exception:
+            picks = []
+    uni_path = ("innimmo_universe_data.json" if os.path.exists("innimmo_universe_data.json")
+               else "innimmo_watchlist_data.json")
+    uni = []
+    if os.path.exists(uni_path):
+        try:
+            uni = json.load(open(uni_path, encoding="utf-8"))
+        except Exception:
+            uni = []
+    import home
+    movers = home.cee_movers([c["ticker"] for c in uni], top_n=5)
+    top_picks = sorted(picks, key=lambda c: c["score"], reverse=True)[:5]
+    return movers, top_picks
+
+
+@st.cache_data(ttl=30 * 60, show_spinner=False)
+def home_research_news():
+    import home
+    return {t: home.news_for_theme(t, total=4) for t in home.NEWS_THEMES}
+
+
 # --------------------------------------------------------------------------- #
 # UI
 # --------------------------------------------------------------------------- #
@@ -155,26 +196,55 @@ with st.sidebar:
     if not (st.secrets.get("ANTHROPIC_API_KEY") if hasattr(st, "secrets") else None):
         st.caption("No AI key set → theses are rule-based summaries.")
 
-tab_screen, tab_lookup, tab_discover, tab_watch, tab_news = st.tabs(
-    ["📊 Screener", "🔎 Ticker lookup", "🧭 Discover", "⭐ Watchlist", "📰 News"])
+tab_home, tab_screen, tab_discover, tab_watch, tab_news = st.tabs(
+    ["🏠 Home", "📊 Screener", "🧭 Discover", "⭐ Watchlist", "📰 News"])
+
+with tab_home:
+    import home
+    import watchlist as wl
+
+    with st.spinner("Loading your home page..."):
+        markets = home_markets()
+        movers, top_picks = home_movers_and_picks()
+        news_by_theme = home_research_news()
+
+        watch_items = wl.load()
+        watch_rows = []
+        for it in watch_items:
+            m = watch_metrics(it["ticker"])
+            if m is None:
+                continue
+            ret = None
+            if it.get("entry_price") and m.get("price"):
+                ret = m["price"] / it["entry_price"] - 1
+            watch_rows.append({"ticker": it["ticker"], "name": m["name"],
+                               "score": m["score"], "control": m["control"],
+                               "price": m["price"], "ret_pct": ret})
+
+        html = home.render_home(markets, watch_rows, top_picks, movers,
+                                top_picks, news_by_theme)
+    components.html(html, height=2000, scrolling=True)
 
 with tab_screen:
+    st.markdown("#### Quick ticker lookup")
+    st.caption("Jump to any Yahoo ticker, e.g. `KGH.WA` (Warsaw), `EBS.VI` "
+               "(Vienna), `SNN.RO` (Bucharest) — works for any listed company, "
+               "even outside the standard universe below.")
+    lookup = st.text_input("Ticker", value="", placeholder="KGH.WA",
+                           key="screener_lookup").strip().upper()
+    if lookup:
+        with st.spinner(f"Analysing {lookup}..."):
+            lhtml, _ = analyze_one(lookup)
+        if lhtml is None:
+            st.error(f"Could not fetch {lookup} from Yahoo Finance — check the symbol.")
+        else:
+            _embed(lhtml, height=1500)
+        st.markdown("---")
+
+    st.markdown("#### Full watchlist screen")
     with st.spinner("Fetching live data and scoring the universe — first load ~1-2 min..."):
         html = run_full_screen(int(time.time() // REFRESH_SECONDS))
     _embed(html, height=3400)
-
-with tab_lookup:
-    st.markdown("#### Analyse any ticker on demand")
-    st.caption("Use the Yahoo symbol, e.g. `KGH.WA` (Warsaw), `EBS.VI` (Vienna), "
-               "`SNN.RO` (Bucharest). Works for any listed company.")
-    ticker = st.text_input("Ticker", value="", placeholder="KGH.WA").strip().upper()
-    if ticker:
-        with st.spinner(f"Analysing {ticker}..."):
-            html, score = analyze_one(ticker)
-        if html is None:
-            st.error(f"Could not fetch {ticker} from Yahoo Finance — check the symbol.")
-        else:
-            _embed(html, height=1500)
 
 with tab_discover:
     st.markdown("#### Discover new local companies")

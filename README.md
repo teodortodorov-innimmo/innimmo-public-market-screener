@@ -147,12 +147,34 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Five tabs — **Screener** (full watchlist), **Ticker lookup** (analyse any
-symbol), **Discover** (find new local names), **Watchlist** (track names with an
-optional entry price → live score + return-since-entry), **News** (recent Yahoo
-headlines for your watchlist) — behind a password gate (`APP_PASSWORD` in
-Streamlit secrets); set `ANTHROPIC_API_KEY` there too for AI theses. The screener
-result is cached ~6h with a manual "Refresh" button.
+Five tabs — **Home** (personal front page — see below), **Screener** (full
+watchlist, with a quick ticker-lookup box at the top for any symbol), **Discover**
+(find new local names), **Watchlist** (track names with an optional entry price
+→ live score + return-since-entry), **News** (recent Yahoo headlines for your
+watchlist) — behind a password gate (`APP_PASSWORD` in Streamlit secrets); set
+`ANTHROPIC_API_KEY` there too for AI theses. The screener result is cached ~6h
+with a manual "Refresh" button.
+
+### Home tab (`home.py`)
+
+A Yahoo-Finance-style landing page built around the tool's own data instead of
+generic market media:
+
+- **Market strip** — Europe / US / Crypto / Commodities / Currencies, switchable
+  (live Yahoo quotes; Prague and WIG20 indices omitted — no reliable free ticker).
+- **Hero = your Watchlist** — whatever you add in the Watchlist tab appears here
+  first, with live score, price, and return-since-entry. Falls back to today's
+  top screener picks if the watchlist is empty.
+- **CEE movers & top picks** — today's best/worst movers from the fetched
+  universe (simple 2-day close-to-close change, not intraday ticks) plus the
+  top-scoring screener names.
+- **Research-vertical news** — three columns themed to Innimmo's actual research
+  verticals from Workstream 2 (Market & Competitive Research) in the 2026 intern
+  plan: **Data Centres & Cooling** (T-RES-23), **Energy & Battery Storage**
+  (T-RES-2/18/11), **Fintech & Digital Lending** (T-RES-3/21). *Honest limit:*
+  Yahoo's free news is per-company, not per-topic, so each column pulls real
+  headlines from a representative set of companies in that space — not a true
+  topic search.
 
 Supporting modules: `watchlist.py` (local JSON persistence — ephemeral on
 Streamlit Cloud, use a DB for permanent storage) and `news.py` (Yahoo headlines;
