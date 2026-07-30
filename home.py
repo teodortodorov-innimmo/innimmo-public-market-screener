@@ -336,6 +336,17 @@ def _movers_html(movers: dict) -> str:
            f'<div><div class="sub" style="margin-bottom:6px">Top losers today</div>{l}</div>')
 
 
+def _autoheight() -> str:
+    """Shared iframe auto-height script (see build_dashboard.AUTOHEIGHT_JS).
+    Imported lazily so home.py has no hard import-time dependency on the
+    dashboard builder, and degrades to no-op if it is unavailable."""
+    try:
+        from build_dashboard import AUTOHEIGHT_JS
+        return AUTOHEIGHT_JS
+    except Exception:
+        return ""
+
+
 def _meta_line(n: dict) -> str:
     """Source-agnostic byline. Yahoo items carry a `ticker`, GDELT topic items
     carry only a publisher domain — build from whichever fields exist."""
@@ -451,5 +462,6 @@ def render_home(markets: dict, watch_rows: list[dict], fallback_picks: list[dict
     </div>
   </div>
 </div>
-<script>{js}</script>"""
+<script>{js}</script>
+<script>{_autoheight()}</script>"""
 

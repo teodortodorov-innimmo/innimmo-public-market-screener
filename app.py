@@ -88,8 +88,18 @@ except Exception:
 REFRESH_SECONDS = 6 * 60 * 60
 
 
-def _embed(html: str, height: int = 3200):
-    """Embed a self-contained dashboard HTML string in the page."""
+def _embed(html: str, height: int = 900):
+    """Embed a self-contained dashboard HTML string in the page.
+
+    The generated pages carry an auto-height script (build_dashboard.
+    AUTOHEIGHT_JS) that reports their real height to Streamlit via
+    "streamlit:setFrameHeight", so the frame grows to fit its content and the
+    user gets ONE page scrollbar instead of a nested one. `height` is therefore
+    only the initial value before that message arrives — kept modest so the page
+    grows into place rather than flashing a tall empty box. `scrolling=True` is
+    retained purely as a fallback: if a Streamlit version ever ignored the
+    message, the content would still be reachable rather than clipped.
+    """
     components.html(html, height=height, scrolling=True)
 
 
@@ -306,10 +316,10 @@ with tab_home:
         if _ahtml is None:
             st.error(f"Could not fetch {_selected} from Yahoo Finance — check the symbol.")
         else:
-            _embed(_ahtml, height=1500)
+            _embed(_ahtml, height=900)
         st.markdown("---")
 
-    components.html(html, height=2000, scrolling=True)
+    components.html(html, height=900, scrolling=True)
 
 with tab_screen:
     st.markdown("#### Quick ticker lookup")
@@ -324,13 +334,13 @@ with tab_screen:
         if lhtml is None:
             st.error(f"Could not fetch {lookup} from Yahoo Finance — check the symbol.")
         else:
-            _embed(lhtml, height=1500)
+            _embed(lhtml, height=900)
         st.markdown("---")
 
     st.markdown("#### Full watchlist screen")
     with st.spinner("Fetching live data and scoring the universe — first load ~1-2 min..."):
         html = run_full_screen(int(time.time() // REFRESH_SECONDS))
-    _embed(html, height=3400)
+    _embed(html, height=900)
 
 with tab_discover:
     st.markdown("#### Discover new local companies")
@@ -352,7 +362,7 @@ with tab_discover:
         with st.spinner("Discovering and scoring — this can take a few minutes..."):
             html, n_pass, n_total = discover_screen(tuple(regions), per_region)
         st.success(f"{n_pass} of {n_total} discovered names scored ≥ {s.SCORE_THRESHOLD}.")
-        _embed(html, height=2600)
+        _embed(html, height=900)
 
 with tab_watch:
     import store

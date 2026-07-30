@@ -171,6 +171,37 @@ footer{color:var(--muted);font-size:12px;margin-top:22px;line-height:1.6}
 """
 
 # --------------------------------------------------------------------------- #
+# Streamlit embeds this page in an iframe. Left at a fixed height it gets its own
+# inner scrollbar, so the user has to scroll twice — once for the page, once
+# inside the frame. Streamlit's component protocol accepts a
+# "streamlit:setFrameHeight" postMessage (the same mechanism
+# Streamlit.setFrameHeight() uses), so the page reports its true height and the
+# frame grows to fit — leaving a single page scrollbar. Re-measured on load, on
+# resize, and after clicks, because table rows expand on click. Harmless when the
+# page is opened directly as a file: window.parent is itself and the message is
+# simply ignored.
+AUTOHEIGHT_JS = r"""
+(function(){
+  function send(){
+    var h = Math.max(document.documentElement.scrollHeight,
+                     document.body ? document.body.scrollHeight : 0);
+    try{
+      window.parent.postMessage({isStreamlitMessage:true,
+        type:"streamlit:setFrameHeight", height:h + 8}, "*");
+    }catch(e){}
+  }
+  send();
+  window.addEventListener("load", send);
+  window.addEventListener("resize", send);
+  if (window.ResizeObserver){
+    var ro = new ResizeObserver(send);
+    ro.observe(document.documentElement);
+    if (document.body) ro.observe(document.body);
+  }
+  document.addEventListener("click", function(){ setTimeout(send, 60); });
+})();
+"""
+
 JS = r"""
 const DATA = __DATA__;
 window.__REVIEWS__ = __REVIEWS_JSON__;
@@ -492,7 +523,8 @@ def build_dashboard(src=DEFAULT_JSON, html_path=DEFAULT_HTML, fragment=False):
     price history. Theses are AI-generated drafts. This is an internal research-support tool —
     <b>not investment advice</b>.</footer>
 </div>
-<script>{js}</script>"""
+<script>{js}</script>
+<script>{AUTOHEIGHT_JS}</script>"""
 
     if fragment:
         page = body
