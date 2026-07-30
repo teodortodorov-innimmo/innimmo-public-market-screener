@@ -1,0 +1,14 @@
+# Pin the app theme so it is deterministic.
+#
+# WHY THIS MATTERS HERE: the dashboards are rendered as our own HTML inside
+# iframes. Left to themselves they follow the *operating system's*
+# prefers-color-scheme, while Streamlit's own chrome follows *this* setting — so
+# on a machine set to dark mode you got a black dashboard inside a white app.
+# app.py reads this value and stamps it onto the embedded pages so the two always
+# agree. Switch "light" to "dark" here and the whole app follows, chrome included.
+[theme]
+base = "light"
+
+[server]
+# The generated dashboards are large single HTML strings.
+maxMessageSize = 300

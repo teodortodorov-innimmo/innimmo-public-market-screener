@@ -147,6 +147,11 @@ body{margin:0}
   background:var(--paper);color:var(--ink);font-family:var(--sans);
   font-size:var(--fs-md);line-height:1.5;padding:var(--sp-1) 2px var(--sp-6);
 }
+/* Dark palette, applied either by OS preference (standalone use) or by an
+   explicit data-theme="dark" that app.py stamps on to match Streamlit's own
+   theme — otherwise a dark OS gave a black page inside white app chrome.
+   The attribute selectors are more specific than the media query, so an
+   explicit theme always wins over the OS setting. */
 @media (prefers-color-scheme:dark){.ihome{
   --paper:#13171c;--card:#1b2027;--ink:#e7eaee;--muted:#98a2ae;--line:#2a313a;
   --line2:#39424d;--accent:#cf6478;--accent2:#e08596;--pos:#3f9d6c;
@@ -155,6 +160,18 @@ body{margin:0}
   --track:#252c34;--s-mid:#3f9d6c;--s-lo:#b8842a;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.28);
   --shadow-hover:0 2px 5px rgba(0,0,0,.38),0 10px 26px rgba(0,0,0,.36);}}
+.ihome[data-theme="dark"]{
+  --paper:#13171c;--card:#1b2027;--ink:#e7eaee;--muted:#98a2ae;--line:#2a313a;
+  --line2:#39424d;--accent:#cf6478;--accent2:#e08596;--pos:#3f9d6c;--neg:#d46f81;
+  --track:#252c34;--s-mid:#3f9d6c;--s-lo:#b8842a;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.28);
+  --shadow-hover:0 2px 5px rgba(0,0,0,.38),0 10px 26px rgba(0,0,0,.36);}
+.ihome[data-theme="light"]{
+  --paper:#f4f6f8;--card:#fff;--ink:#191d23;--muted:#5f6a76;--line:#e3e7eb;
+  --line2:#d3d9df;--accent:#7d2b3a;--accent2:#7d2b3a;--pos:#2f7d55;--neg:#9c3a48;
+  --track:#eceef1;--s-mid:#2f7d55;--s-lo:#9a6a15;
+  --shadow:0 1px 2px rgba(20,30,45,.05),0 4px 14px rgba(20,30,45,.05);
+  --shadow-hover:0 2px 4px rgba(20,30,45,.07),0 8px 22px rgba(20,30,45,.09);}
 
 .ihome .strip{display:flex;align-items:center;gap:var(--sp-4);background:var(--card);
   border:1px solid var(--line);border-radius:var(--radius-lg);
@@ -336,6 +353,11 @@ def _movers_html(movers: dict) -> str:
            f'<div><div class="sub" style="margin-bottom:6px">Top losers today</div>{l}</div>')
 
 
+def _theme_attr(theme: str | None) -> str:
+    """data-theme attribute for the wrapper, or nothing to follow the OS."""
+    return f' data-theme="{theme}"' if theme in ("light", "dark") else ""
+
+
 def _autoheight() -> str:
     """Shared iframe auto-height script (see build_dashboard.AUTOHEIGHT_JS).
     Imported lazily so home.py has no hard import-time dependency on the
@@ -411,7 +433,7 @@ def _agenda_html(headlines: list[dict]) -> str:
 
 def render_home(markets: dict, watch_rows: list[dict], fallback_picks: list[dict],
                 movers: dict, top_picks: list[dict], news_by_theme: dict,
-                agenda: list[dict] | None = None) -> str:
+                agenda: list[dict] | None = None, theme: str | None = None) -> str:
     import json as _json
     hero = (_watchlist_html(watch_rows) if watch_rows
            else _fallback_picks_html(fallback_picks))
@@ -429,7 +451,7 @@ def render_home(markets: dict, watch_rows: list[dict], fallback_picks: list[dict
 
     return f"""<meta charset="utf-8">
 <style>{CSS}</style>
-<div class="ihome">
+<div class="ihome"{_theme_attr(theme)}>
   <div class="strip">
     <select id="mkt-select">
       <option>Europe</option><option>US</option><option>Crypto</option>

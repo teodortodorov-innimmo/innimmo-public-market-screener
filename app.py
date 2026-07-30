@@ -108,12 +108,37 @@ def _read(path: str) -> str:
         return fh.read()
 
 
+def _app_theme() -> str:
+    """Streamlit's own theme ("light"/"dark"), so embedded pages can match it.
+
+    The dashboards are our own HTML in iframes; on their own they follow the
+    OPERATING SYSTEM's prefers-color-scheme, which produced a black dashboard
+    inside white Streamlit chrome on dark-mode machines. Pinned in
+    .streamlit/config.toml, read here, and stamped onto every embedded page.
+    """
+    try:
+        base = st.get_option("theme.base")
+        if base in ("light", "dark"):
+            return base
+    except Exception:
+        pass
+    return "light"
+
+
+APP_THEME = _app_theme()
+
+
 # --------------------------------------------------------------------------- #
 # Cached workers
 # --------------------------------------------------------------------------- #
 @st.cache_data(ttl=REFRESH_SECONDS, show_spinner=False)
 def run_full_screen(_bust: int) -> str:
     s.main()
+    # main() writes dashboard.html itself (untouched for standalone/CLI use, where
+    # following the OS theme is correct). Rebuild it here with the app's theme so
+    # the embedded copy matches Streamlit's chrome.
+    from build_dashboard import build_dashboard
+    build_dashboard("innimmo_watchlist_data.json", "dashboard.html", theme=APP_THEME)
     return _read("dashboard.html")
 
 
@@ -126,7 +151,7 @@ def analyze_one(ticker: str) -> tuple:
         return None, None
     base = "analysis_" + ticker.replace(".", "_")
     s.write_json([co], base + ".json")
-    build_dashboard(base + ".json", base + ".html")
+    build_dashboard(base + ".json", base + ".html", theme=APP_THEME)
     return _read(base + ".html"), co.score
 
 
@@ -143,7 +168,8 @@ def discover_screen(regions: tuple, per_region: int) -> tuple:
                     key=lambda c: c.score, reverse=True)
     s.write_thesis(passed)
     s.write_json(passed, "innimmo_discovered_data.json")
-    build_dashboard("innimmo_discovered_data.json", "dashboard_discovered.html")
+    build_dashboard("innimmo_discovered_data.json",
+                    "dashboard_discovered.html", theme=APP_THEME)
     return _read("dashboard_discovered.html"), len(passed), len(companies)
 
 
@@ -283,7 +309,8 @@ with tab_home:
                                "price": m["price"], "ret_pct": ret})
 
         html = home.render_home(markets, watch_rows, top_picks, movers,
-                                top_picks, news_by_theme, agenda=home_agenda())
+                                top_picks, news_by_theme,
+                                agenda=home_agenda(), theme=APP_THEME)
 
     # A company card on the Home page is an <a href="?analyze=TICKER">. The page
     # is inside a sandboxed iframe and cannot call back into Streamlit directly,

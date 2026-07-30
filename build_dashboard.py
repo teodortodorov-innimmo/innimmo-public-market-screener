@@ -171,6 +171,21 @@ footer{color:var(--muted);font-size:12px;margin-top:22px;line-height:1.6}
 """
 
 # --------------------------------------------------------------------------- #
+def theme_js(theme: str | None) -> str:
+    """Stamp an explicit theme onto the page root, overriding the OS preference.
+
+    Without this the page falls back to @media (prefers-color-scheme), which
+    follows the OPERATING SYSTEM — so a machine set to dark mode rendered a black
+    dashboard inside Streamlit's white chrome. app.py passes Streamlit's own
+    theme here so the two always match. Passing None keeps the OS-following
+    behaviour, which is what we want when the file is opened directly.
+    """
+    if theme not in ("light", "dark"):
+        return ""
+    return (f'(function(){{document.documentElement.setAttribute'
+            f'("data-theme","{theme}");}})();')
+
+
 # Streamlit embeds this page in an iframe. Left at a fixed height it gets its own
 # inner scrollbar, so the user has to scroll twice — once for the page, once
 # inside the frame. Streamlit's component protocol accepts a
@@ -482,7 +497,8 @@ def _kpis(data):
                    for l, v in tiles)
 
 
-def build_dashboard(src=DEFAULT_JSON, html_path=DEFAULT_HTML, fragment=False):
+def build_dashboard(src=DEFAULT_JSON, html_path=DEFAULT_HTML, fragment=False,
+                    theme=None):
     if not os.path.exists(src):
         raise FileNotFoundError(f"{src} not found — run activist_screener.py first.")
     with open(src, encoding="utf-8") as fh:
@@ -523,6 +539,7 @@ def build_dashboard(src=DEFAULT_JSON, html_path=DEFAULT_HTML, fragment=False):
     price history. Theses are AI-generated drafts. This is an internal research-support tool —
     <b>not investment advice</b>.</footer>
 </div>
+<script>{theme_js(theme)}</script>
 <script>{js}</script>
 <script>{AUTOHEIGHT_JS}</script>"""
 
