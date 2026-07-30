@@ -13,3 +13,4 @@ dashboard_discovered.html
 analysis_*.json
 analysis_*.html
 watchlist.json
+innimmo_store.db

@@ -174,7 +174,11 @@ body{margin:0}
 
 .ihome .grid{display:grid;grid-template-columns:1.7fr 1fr;gap:var(--sp-4);align-items:start}
 @media (max-width:820px){.ihome .grid{grid-template-columns:1fr}}
-.ihome .col-main{display:flex;flex-direction:column;gap:var(--sp-4)}
+.ihome .col-main,.ihome .col-rail{display:flex;flex-direction:column;gap:var(--sp-4)}
+.ihome .lock{display:inline-block;font-size:var(--fs-xs);padding:1px 5px;
+  border:1px solid var(--line2);border-radius:4px;color:var(--muted);
+  margin-left:var(--sp-1);vertical-align:1px}
+.ihome .agenda .newsitem:first-of-type{border-top:none;padding-top:0}
 
 .ihome .panel{background:var(--card);border:1px solid var(--line);
   border-radius:var(--radius-lg);padding:var(--sp-5);box-shadow:var(--shadow)}
@@ -332,6 +336,13 @@ def _movers_html(movers: dict) -> str:
            f'<div><div class="sub" style="margin-bottom:6px">Top losers today</div>{l}</div>')
 
 
+def _meta_line(n: dict) -> str:
+    """Source-agnostic byline. Yahoo items carry a `ticker`, GDELT topic items
+    carry only a publisher domain — build from whichever fields exist."""
+    bits = [n.get("date", ""), n.get("ticker", ""), n.get("publisher", "")]
+    return " · ".join(b for b in bits if b)
+
+
 def _news_col_html(theme: str, items: list[dict]) -> str:
     if not items:
         body = '<div class="empty">No recent headlines found.</div>'
@@ -350,22 +361,46 @@ def _news_col_html(theme: str, items: list[dict]) -> str:
             body = (f'<a class="hero-item" href="{head["url"]}" target="_blank" rel="noopener">'
                     f'<img src="{head["image"]}" alt="" loading="lazy">'
                     f'<div class="title">{head["title"]}</div>'
-                    f'<div class="meta">{head["date"]} · {head["ticker"]} · {head["publisher"]}</div></a>')
+                    f'<div class="meta">{_meta_line(head)}</div></a>')
         else:
             body = (f'<div class="newsitem" style="border-top:none;padding-top:0">'
                     f'<a href="{head["url"]}" target="_blank" rel="noopener">{head["title"]}</a>'
-                    f'<div class="meta">{head["date"]} · {head["ticker"]} · {head["publisher"]}</div></div>')
+                    f'<div class="meta">{_meta_line(head)}</div></div>')
         body += "".join(
             f'<div class="newsitem">'
             f'<a href="{n["url"]}" target="_blank" rel="noopener">{n["title"]}</a>'
-            f'<div class="meta">{n["date"]} · {n["ticker"]} · {n["publisher"]}</div></div>'
+            f'<div class="meta">{_meta_line(n)}</div></div>'
             for n in rest
         )
     return f'<div class="newscol"><h3>{theme}</h3>{body}</div>'
 
 
+def _agenda_html(headlines: list[dict]) -> str:
+    """The Economist strip — headline + link back to the publisher only.
+
+    Deliberately headline-only: The Economist is a paid publication, so we show
+    what its public RSS feed offers and send the reader to economist.com. The
+    free, readable coverage of the same themes sits in the columns above.
+    """
+    if not headlines:
+        return ""
+    rows = "".join(
+        f'<div class="newsitem">'
+        f'<a href="{h["url"]}" target="_blank" rel="noopener">{h["title"]}</a>'
+        f'<div class="meta">{h.get("date","")} · {h.get("section","")} '
+        f'· The Economist <span class="lock">paywall</span></div></div>'
+        for h in headlines
+    )
+    return (f'<div class="panel"><h2>On the agenda</h2>'
+            f'<div class="sub">What the business press is leading with this week — '
+            f'headlines from The Economist, linked to the source. Subscription '
+            f'required to read there; the free coverage above is open.</div>'
+            f'<div class="agenda">{rows}</div></div>')
+
+
 def render_home(markets: dict, watch_rows: list[dict], fallback_picks: list[dict],
-                movers: dict, top_picks: list[dict], news_by_theme: dict) -> str:
+                movers: dict, top_picks: list[dict], news_by_theme: dict,
+                agenda: list[dict] | None = None) -> str:
     import json as _json
     hero = (_watchlist_html(watch_rows) if watch_rows
            else _fallback_picks_html(fallback_picks))
@@ -404,12 +439,15 @@ def render_home(markets: dict, watch_rows: list[dict], fallback_picks: list[dict
         <div class="newscols">{news_html}</div>
       </div>
     </div>
-    <div class="panel">
-      <h2>European movers &amp; top picks</h2>
-      <div class="sub">From today's universe — not investment advice.</div>
-      {_movers_html(movers)}
-      <div class="sub" style="margin-top:14px;margin-bottom:6px">Top screener picks</div>
-      {top_picks_html}
+    <div class="col-rail">
+      <div class="panel">
+        <h2>European movers &amp; top picks</h2>
+        <div class="sub">From today's universe — not investment advice.</div>
+        {_movers_html(movers)}
+        <div class="sub" style="margin-top:14px;margin-bottom:6px">Top screener picks</div>
+        {top_picks_html}
+      </div>
+      {_agenda_html(agenda or [])}
     </div>
   </div>
 </div>

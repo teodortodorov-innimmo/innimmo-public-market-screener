@@ -213,9 +213,47 @@ generic market media:
   headlines from a representative set of companies in that space — not a true
   topic search.
 
-Supporting modules: `watchlist.py` (local JSON persistence — ephemeral on
-Streamlit Cloud, use a DB for permanent storage) and `news.py` (Yahoo headlines;
-coverage is thin for small CEE names and some items only *mention* the company).
+Supporting modules: `store.py` (SQLite watchlist + decision log), `news.py`
+(Yahoo per-company headlines) and `news_feeds.py` (GDELT topic search + Economist
+agenda).
+
+### Watchlist & decisions (`store.py`)
+
+SQLite-backed, replacing the old flat `watchlist.json`. Each name carries an
+entry price, a **review status** (`new → reviewing → shortlist → to IC → passed`)
+and a note, and every status change is written to an **append-only decision log**
+so the reasoning history is never overwritten.
+
+> **Persistence limit, stated plainly:** Streamlit Community Cloud gives each app
+> an ephemeral filesystem. The database survives every rerun, navigation and
+> re-login, but is wiped when the container restarts (redeploy or idle timeout).
+> Genuinely durable storage needs a hosted database or a git write-back, and both
+> require credentials. The keyless workaround is the **Download / Upload** pair in
+> the Watchlist tab — export a JSON backup and restore it in one click, statuses
+> and notes included.
+
+### News sources (`news_feeds.py`)
+
+Three sources, each used for what it is actually good at:
+
+| Source | Role | Why |
+|---|---|---|
+| **GDELT** | The readable articles | Free, permits commercial use, and searches article **text** — so it returns genuine *topic* matches (real data-centre-cooling stories), fixing Yahoo's per-company-only limitation |
+| **Yahoo** | Per-company + top-up | Keeps a column populated if GDELT is throttled |
+| **The Economist** | Agenda only | Shows what the business press is leading with |
+
+**On the paywall — a deliberate boundary.** The Economist is a paid publication,
+so the app takes only what its **public RSS feed** offers (headline, date, link),
+labels it `paywall`, and links straight back to economist.com. It never fetches
+or reconstructs article bodies. Free readable coverage of the same themes comes
+from GDELT instead.
+
+**GDELT rate limits:** GDELT throttles per IP and returns HTTP 429 well beyond
+its documented 5-second window — during testing a busy address needed **seven**
+attempts before succeeding. Calls are therefore throttled and retried patiently,
+and **fail soft** (returning `[]`), so a news outage degrades the page to Yahoo
+items rather than breaking it. Results are cached 30 minutes, so a slow first
+load is paid once.
 
 ## Data validation (`validate.py`)
 

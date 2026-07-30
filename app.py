@@ -4,11 +4,13 @@ Streamlit app for the Innimmo Activist Screener (T-AI-10).
 
 Tabs:
   - Home       : personal front page — your watchlist, EU/US/Crypto/Commodities/
-                 Currencies market strip, CEE movers, and research-vertical news
-  - Screener   : the full CEE/European six-factor watchlist (cached, ~6h),
+                 Currencies market strip, European movers, research-vertical
+                 news (GDELT topic search + Yahoo) and an Economist agenda strip
+  - Screener   : the full pan-European six-factor watchlist (cached, ~6h),
                  with a quick ticker-lookup box at the top
   - Discover   : find NEW local companies via Yahoo's free screener
-  - Watchlist  : track names with an optional entry price
+  - Watchlist  : track names with an entry price, review status and notes,
+                 backed by SQLite, with an append-only decision log
   - News       : recent Yahoo headlines for your watchlist
 
 Reuses the existing pipeline in activist_screener.py — no scoring/rendering
@@ -203,10 +205,33 @@ def home_movers_and_picks():
 
 @st.cache_data(ttl=30 * 60, show_spinner=False)
 def home_research_news():
+    """Per-theme news, GDELT first then Yahoo.
+
+    GDELT searches article TEXT, so it returns genuinely on-topic pieces (real
+    data-centre-cooling stories, not just companies whose names matched). Yahoo
+    is per-company only, so it's the fallback/top-up. GDELT fails soft, in which
+    case a theme simply shows the Yahoo items as before.
+    """
     import home
-    # Fetch a larger pool than we display so there's a good chance at least one
-    # item per theme has a thumbnail image (not every article carries one).
-    return {t: home.news_for_theme(t, per_ticker=4, total=10) for t in home.NEWS_THEMES}
+    import news_feeds as nf
+    out = {}
+    for theme in home.NEWS_THEMES:
+        items = nf.topic_news(theme, max_records=6)
+        seen = {i["title"] for i in items}
+        # Top up with Yahoo so a column is never thin if GDELT is throttled.
+        for y in home.news_for_theme(theme, per_ticker=4, total=10):
+            if y["title"] not in seen:
+                items.append(y)
+                seen.add(y["title"])
+        out[theme] = items
+    return out
+
+
+@st.cache_data(ttl=60 * 60, show_spinner=False)
+def home_agenda():
+    """Economist headlines (headline + link only — see news_feeds.py)."""
+    import news_feeds as nf
+    return nf.economist_headlines(limit=7)
 
 
 # --------------------------------------------------------------------------- #
@@ -227,7 +252,7 @@ tab_home, tab_screen, tab_discover, tab_watch, tab_news = st.tabs(
 
 with tab_home:
     import home
-    import watchlist as wl
+    import store as wl
 
     with st.spinner("Loading your home page..."):
         markets = home_markets()
@@ -248,7 +273,7 @@ with tab_home:
                                "price": m["price"], "ret_pct": ret})
 
         html = home.render_home(markets, watch_rows, top_picks, movers,
-                                top_picks, news_by_theme)
+                                top_picks, news_by_theme, agenda=home_agenda())
 
     # A company card on the Home page is an <a href="?analyze=TICKER">. The page
     # is inside a sandboxed iframe and cannot call back into Streamlit directly,
@@ -330,11 +355,13 @@ with tab_discover:
         _embed(html, height=2600)
 
 with tab_watch:
-    import watchlist as wl
+    import store
     st.markdown("#### Your watchlist / portfolio")
-    st.caption("Track names with an optional entry price to see live score and "
-               "return-since-entry. Stored in a local file — on Streamlit Cloud "
-               "this resets on restart (use a database for permanent storage).")
+    st.caption("Track names with an optional entry price, a review status and "
+               "notes. Stored in a local SQLite database, so it survives every "
+               "rerun — but Streamlit Cloud wipes the filesystem when the "
+               "container restarts, so use Download/Upload below to keep a "
+               "durable copy.")
 
     with st.form("add_wl", clear_on_submit=True):
         c1, c2, c3 = st.columns([2, 1, 3])
@@ -342,10 +369,10 @@ with tab_watch:
         wp = c2.number_input("Entry price (optional)", min_value=0.0, value=0.0, step=0.01)
         wn = c3.text_input("Note (optional)")
         if st.form_submit_button("Add / update") and wt.strip():
-            wl.add(wt, entry_price=(wp or None), note=wn)
+            store.add(wt, entry_price=(wp or None), note=wn)
             st.rerun()
 
-    items = wl.load()
+    items = store.load()
     if not items:
         st.info("Watchlist is empty — add a ticker above.")
     else:
@@ -357,6 +384,7 @@ with tab_watch:
                 ret = m["price"] / it["entry_price"] - 1
             rows.append({
                 "Ticker": it["ticker"],
+                "Status": it.get("status", "new"),
                 "Name": (m["name"][:26] if m else "—"),
                 "Score": (m["score"] if m else "—"),
                 "Control": (m["control"] if m else "—"),
@@ -367,14 +395,56 @@ with tab_watch:
                 "Note": it.get("note", ""),
             })
         st.dataframe(rows, use_container_width=True, hide_index=True)
-        rem = st.selectbox("Remove a name", [""] + [i["ticker"] for i in items])
-        if rem and st.button("Remove selected"):
-            wl.remove(rem)
+
+        st.markdown("##### Record a decision")
+        st.caption("Move a name through the review workflow. Every change is "
+                   "kept in an append-only log, so the reasoning history is "
+                   "never overwritten.")
+        d1, d2, d3 = st.columns([1.2, 1.2, 3])
+        d_ticker = d1.selectbox("Name", [i["ticker"] for i in items], key="dec_ticker")
+        d_status = d2.selectbox("Status", store.STATUSES, key="dec_status")
+        d_note = d3.text_input("Reason / note (optional)", key="dec_note")
+        b1, b2 = st.columns([1, 5])
+        if b1.button("Save decision", use_container_width=True):
+            store.set_status(d_ticker, d_status, d_note)
+            st.success(f"{d_ticker} → {d_status}")
             st.rerun()
+        if b2.button(f"Remove {d_ticker} from watchlist"):
+            store.remove(d_ticker)
+            st.rerun()
+
+        with st.expander("Decision history"):
+            hist = store.history(limit=60)
+            if hist:
+                st.dataframe(
+                    [{"When": h["ts"], "Ticker": h["ticker"],
+                      "Status": h["status"] or "—", "Note": h["note"] or ""}
+                     for h in hist],
+                    use_container_width=True, hide_index=True)
+            else:
+                st.caption("No decisions recorded yet.")
+
+    st.markdown("##### Backup / restore")
+    st.caption("Streamlit Cloud storage is ephemeral. Download your list to keep "
+               "it, and upload it again after a restart to bring everything back "
+               "— statuses, notes and entry prices included.")
+    bk1, bk2 = st.columns(2)
+    bk1.download_button("Download watchlist (JSON)", data=store.export_json(),
+                        file_name="innimmo_watchlist_backup.json",
+                        mime="application/json", use_container_width=True)
+    up = bk2.file_uploader("Restore from a backup file", type=["json"],
+                           label_visibility="collapsed")
+    if up is not None:
+        try:
+            n = store.import_json(up.getvalue().decode("utf-8"))
+            st.success(f"Restored {n} names.")
+            st.rerun()
+        except Exception as exc:
+            st.error(f"Could not read that file: {exc}")
 
 with tab_news:
     import json
-    import watchlist as wl
+    import store as wl
     st.markdown("#### News")
     st.caption("Recent Yahoo headlines for your watchlist (or the top screener "
                "names if it's empty). Coverage of small CEE names is thin, and "
