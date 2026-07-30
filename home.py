@@ -129,76 +129,118 @@ CSS = r"""
 *{box-sizing:border-box}
 body{margin:0}
 .ihome{
+  /* palette */
   --paper:#f4f6f8;--card:#fff;--ink:#191d23;--muted:#5f6a76;--line:#e3e7eb;
   --line2:#d3d9df;--accent:#7d2b3a;--accent2:#7d2b3a;--pos:#2f7d55;--neg:#9c3a48;
   --track:#eceef1;--s-mid:#2f7d55;--s-lo:#9a6a15;
   --shadow:0 1px 2px rgba(20,30,45,.05),0 4px 14px rgba(20,30,45,.05);
+  --shadow-hover:0 2px 4px rgba(20,30,45,.07),0 8px 22px rgba(20,30,45,.09);
+  /* type: one modular scale — no arbitrary half-pixel sizes */
+  --fs-xs:12px;--fs-sm:13px;--fs-base:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:20px;
+  /* space: dense dashboard scale (4-32) */
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:24px;--sp-6:32px;
+  --radius:10px;--radius-lg:12px;
+  --ease:cubic-bezier(.2,0,.2,1);--dur:180ms;
   --serif:Calibri,Carlito,"Segoe UI",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   --sans:Calibri,Carlito,"Segoe UI",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
   --mono:ui-monospace,"Cascadia Code","SF Mono",Menlo,Consolas,monospace;
   background:var(--paper);color:var(--ink);font-family:var(--sans);
-  font-size:17px;line-height:1.5;padding:4px 2px 32px;
+  font-size:var(--fs-md);line-height:1.5;padding:var(--sp-1) 2px var(--sp-6);
 }
 @media (prefers-color-scheme:dark){.ihome{
   --paper:#13171c;--card:#1b2027;--ink:#e7eaee;--muted:#98a2ae;--line:#2a313a;
-  --line2:#39424d;--accent:#cf6478;--accent2:#e08596;--pos:#3f9d6c;--neg:#cf6478;
+  --line2:#39424d;--accent:#cf6478;--accent2:#e08596;--pos:#3f9d6c;
+  /* lightened from #cf6478 to clear WCAG AA (4.98:1 vs 4.48:1 on --card) */
+  --neg:#d46f81;
   --track:#252c34;--s-mid:#3f9d6c;--s-lo:#b8842a;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.28);}}
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.28);
+  --shadow-hover:0 2px 5px rgba(0,0,0,.38),0 10px 26px rgba(0,0,0,.36);}}
 
-.ihome .strip{display:flex;align-items:center;gap:14px;background:var(--card);
-  border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:16px;
+.ihome .strip{display:flex;align-items:center;gap:var(--sp-4);background:var(--card);
+  border:1px solid var(--line);border-radius:var(--radius-lg);
+  padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-4);
   overflow-x:auto;box-shadow:var(--shadow)}
-.ihome select{font-family:var(--sans);font-size:14.5px;background:transparent;
-  color:var(--ink);border:1px solid var(--line2);border-radius:7px;padding:6px 9px;
-  flex:none}
+.ihome select{font-family:var(--sans);font-size:var(--fs-base);background:var(--card);
+  color:var(--ink);border:1px solid var(--line2);border-radius:7px;
+  padding:var(--sp-2) var(--sp-3);flex:none;cursor:pointer;min-height:36px}
+.ihome select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .ihome .tick{display:flex;flex-direction:column;gap:1px;flex:none;min-width:96px}
-.ihome .tick .lb{font-size:12px;color:var(--muted);white-space:nowrap}
-.ihome .tick .pv{font-family:var(--mono);font-size:15px;font-weight:600;white-space:nowrap}
-.ihome .tick .pv .chg{font-size:12.5px;margin-left:5px}
+.ihome .tick .lb{font-size:var(--fs-xs);color:var(--muted);white-space:nowrap;
+  letter-spacing:.02em;text-transform:uppercase}
+.ihome .tick .pv{font-family:var(--mono);font-size:var(--fs-md);font-weight:600;
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+.ihome .tick .pv .chg{font-size:var(--fs-sm);margin-left:var(--sp-1)}
 .ihome .pos{color:var(--pos)}.ihome .neg{color:var(--neg)}
 
-.ihome .grid{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;align-items:start}
+.ihome .grid{display:grid;grid-template-columns:1.7fr 1fr;gap:var(--sp-4);align-items:start}
 @media (max-width:820px){.ihome .grid{grid-template-columns:1fr}}
-.ihome .col-main{display:flex;flex-direction:column;gap:16px}
+.ihome .col-main{display:flex;flex-direction:column;gap:var(--sp-4)}
 
-.ihome .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;
-  padding:18px 20px;box-shadow:var(--shadow)}
-.ihome h2{font-family:var(--serif);font-size:19px;margin:0 0 5px}
-.ihome .sub{font-size:13.5px;color:var(--muted);margin:0 0 12px}
+.ihome .panel{background:var(--card);border:1px solid var(--line);
+  border-radius:var(--radius-lg);padding:var(--sp-5);box-shadow:var(--shadow)}
+.ihome h2{font-family:var(--serif);font-size:var(--fs-xl);margin:0 0 var(--sp-1);
+  letter-spacing:-.01em}
+.ihome .sub{font-size:var(--fs-sm);color:var(--muted);margin:0 0 var(--sp-3)}
 
-.ihome .wcard{border:1px solid var(--line);border-radius:10px;padding:11px 14px;
-  margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.ihome .wcard{border:1px solid var(--line);border-radius:var(--radius);
+  padding:var(--sp-3) var(--sp-4);margin-bottom:var(--sp-2);display:flex;
+  justify-content:space-between;align-items:center;gap:var(--sp-3);min-height:44px}
 /* Cards are <a> links that open ?analyze=<ticker> on the top-level app. */
 .ihome a.wcard{text-decoration:none;color:inherit;cursor:pointer;
-  transition:border-color .12s ease, box-shadow .12s ease, transform .12s ease}
-.ihome a.wcard:hover{border-color:var(--accent);box-shadow:var(--shadow);
+  transition:border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease),
+    transform var(--dur) var(--ease)}
+.ihome a.wcard:hover{border-color:var(--accent);box-shadow:var(--shadow-hover);
   transform:translateY(-1px)}
 .ihome a.wcard:hover .nm{color:var(--accent)}
+.ihome a.wcard:active{transform:translateY(0)}
 .ihome a.wcard:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.ihome .wcard .nm{font-weight:600;font-size:15.5px}
-.ihome .wcard .tk{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
-.ihome .chip{display:inline-block;padding:3px 9px;border-radius:6px;color:#fff;
-  font-weight:700;font-family:var(--mono);font-size:13.5px}
-.ihome .empty{font-size:14.5px;color:var(--muted);padding:8px 0}
+.ihome .wcard .nm{font-weight:600;font-size:var(--fs-md);
+  transition:color var(--dur) var(--ease)}
+.ihome .wcard .tk{font-family:var(--mono);font-size:var(--fs-sm);color:var(--muted)}
+.ihome .chip{display:inline-block;padding:var(--sp-1) var(--sp-2);border-radius:6px;
+  color:#fff;font-weight:700;font-family:var(--mono);font-size:var(--fs-base);
+  font-variant-numeric:tabular-nums}
+.ihome .empty{font-size:var(--fs-base);color:var(--muted);padding:var(--sp-2) 0}
 
-.ihome .moverow{display:flex;justify-content:space-between;font-size:14.5px;padding:6px 0;
-  border-bottom:1px solid var(--line)}
+.ihome .moverow{display:flex;justify-content:space-between;font-size:var(--fs-base);
+  padding:var(--sp-2) 0;border-bottom:1px solid var(--line)}
 .ihome .moverow:last-child{border-bottom:none}
 .ihome .moverow .tk{font-family:var(--mono)}
+.ihome .moverow span:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums}
 
-.ihome .newscols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+.ihome .newscols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp-5)}
 @media (max-width:900px){.ihome .newscols{grid-template-columns:1fr}}
-.ihome .newscol h3{font-size:16.5px;margin:0 0 8px;font-family:var(--serif)}
-.ihome .hero-item{display:block;text-decoration:none;color:inherit;margin-bottom:12px}
+.ihome .newscol h3{font-size:var(--fs-lg);margin:0 0 var(--sp-2);font-family:var(--serif);
+  letter-spacing:-.01em}
+.ihome .hero-item{display:block;text-decoration:none;color:inherit;margin-bottom:var(--sp-3)}
 .ihome .hero-item img{width:100%;height:120px;object-fit:cover;border-radius:8px;
-  display:block;margin-bottom:8px;background:var(--track)}
-.ihome .hero-item .title{font-weight:700;font-size:15.5px;color:var(--ink);line-height:1.3}
+  display:block;margin-bottom:var(--sp-2);background:var(--track);
+  transition:opacity var(--dur) var(--ease)}
+.ihome .hero-item:hover img{opacity:.88}
+.ihome .hero-item .title{font-weight:700;font-size:var(--fs-md);color:var(--ink);
+  line-height:1.35;transition:color var(--dur) var(--ease)}
 .ihome .hero-item:hover .title{color:var(--accent)}
-.ihome .newsitem{margin-bottom:11px;font-size:14.5px;padding-top:10px;border-top:1px solid var(--line)}
+.ihome .hero-item:focus-visible{outline:2px solid var(--accent);outline-offset:2px;
+  border-radius:8px}
+.ihome .newsitem{margin-bottom:var(--sp-3);font-size:var(--fs-base);
+  padding-top:var(--sp-3);border-top:1px solid var(--line)}
 .ihome .newsitem:first-of-type{border-top:none;padding-top:0}
-.ihome .newsitem a{color:var(--ink);text-decoration:none;font-weight:600}
+.ihome .newsitem a{color:var(--ink);text-decoration:none;font-weight:600;
+  transition:color var(--dur) var(--ease)}
 .ihome .newsitem a:hover{color:var(--accent)}
-.ihome .newsitem .meta{font-size:12.5px;color:var(--muted);margin-top:3px}
+.ihome .newsitem a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;
+  border-radius:3px}
+.ihome .newsitem .meta,.ihome .hero-item .meta{font-size:var(--fs-sm);
+  color:var(--muted);margin-top:var(--sp-1)}
+
+/* Honour the OS "reduce motion" setting — the hover lift and fades are
+   decorative, so drop them entirely rather than just shortening them. */
+@media (prefers-reduced-motion:reduce){
+  .ihome *,.ihome *::before,.ihome *::after{
+    transition-duration:.01ms !important;animation-duration:.01ms !important;
+    animation-iteration-count:1 !important}
+  .ihome a.wcard:hover{transform:none}
+}
 """
 
 JS = r"""
@@ -257,7 +299,8 @@ def _watchlist_html(watch_rows: list[dict]) -> str:
             f'<div><div class="nm">{r["name"]}</div>'
             f'<div class="tk">{r["ticker"]} · {r.get("control","")}</div></div>'
             f'<div style="text-align:right"><span class="chip" style="background:{_score_color(r.get("score"))}">{_fmt(r.get("score"),1)}</span><br>'
-            f'<span style="font-family:var(--mono);font-size:12.5px">{_fmt(r.get("price"))}</span> {ret_html}</div></a>'
+            f'<span style="font-family:var(--mono);font-size:var(--fs-sm);'
+            f'font-variant-numeric:tabular-nums">{_fmt(r.get("price"))}</span> {ret_html}</div></a>'
         )
     if extra > 0:
         out.append(f'<div class="empty">+{extra} more on your Watchlist tab</div>')

@@ -39,7 +39,7 @@ CSS = r"""
 @media (prefers-color-scheme:dark){:root{
   --paper:#13171c;--card:#1b2027;--ink:#e7eaee;--muted:#98a2ae;--line:#2a313a;
   --line2:#39424d;--accent:#cf6478;--accent2:#e08596;--s-lo:#b8842a;
-  --s-mid:#3f9d6c;--s-hi:#2f8a58;--pos:#3f9d6c;--neg:#cf6478;--track:#252c34;
+  --s-mid:#3f9d6c;--s-hi:#2f8a58;--pos:#3f9d6c;--neg:#d46f81;--track:#252c34;
   --ma50:#5aa6c9;--ma200:#d9793f;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.28);}}
 :root[data-theme="light"]{--paper:#f4f6f8;--card:#fff;--ink:#191d23;--muted:#5f6a76;
@@ -48,7 +48,7 @@ CSS = r"""
   --ma50:#2f6f8f;--ma200:#b4531f;--shadow:0 1px 2px rgba(20,30,45,.05),0 4px 14px rgba(20,30,45,.05);}
 :root[data-theme="dark"]{--paper:#13171c;--card:#1b2027;--ink:#e7eaee;--muted:#98a2ae;
   --line:#2a313a;--line2:#39424d;--accent:#cf6478;--accent2:#e08596;--s-lo:#b8842a;
-  --s-mid:#3f9d6c;--s-hi:#2f8a58;--pos:#3f9d6c;--neg:#cf6478;--track:#252c34;
+  --s-mid:#3f9d6c;--s-hi:#2f8a58;--pos:#3f9d6c;--neg:#d46f81;--track:#252c34;
   --ma50:#5aa6c9;--ma200:#d9793f;--shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.28);}
 
 *{box-sizing:border-box}
