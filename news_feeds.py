@@ -41,6 +41,20 @@ UA = "Mozilla/5.0 (compatible; InnimmoResearch/1.0; +internal research tool)"
 GDELT_MIN_INTERVAL = 5.5      # seconds between GDELT calls (their stated limit)
 _last_gdelt_call = 0.0
 
+# Circuit breaker. Measured on 2026-07-31: from this IP a single topic query
+# burned 187s across its retry ladder and still returned ZERO articles, because
+# GDELT 429s shared/cloud addresses regardless of pacing. Retrying harder does
+# not help — it only converts a fast empty result into a hung page. So once a
+# call fails we stop asking for a while and let the Yahoo fallback carry the
+# section, which is fast and actually returns articles.
+GDELT_COOLDOWN = 30 * 60      # seconds to stay quiet after a failure
+_gdelt_blocked_until = 0.0
+
+
+def gdelt_available() -> bool:
+    """False while the breaker is open (a recent call failed)."""
+    return time.time() >= _gdelt_blocked_until
+
 # Economist sections that map onto Innimmo's research verticals.
 ECONOMIST_FEEDS = {
     "Business": "https://www.economist.com/business/rss.xml",
@@ -58,7 +72,7 @@ TOPIC_QUERIES = {
 }
 
 
-def _fetch(url: str, timeout: int = 20) -> bytes:
+def _fetch(url: str, timeout: int = 8) -> bytes:
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     return urllib.request.urlopen(req, timeout=timeout).read()
 
@@ -66,15 +80,24 @@ def _fetch(url: str, timeout: int = 20) -> bytes:
 # --------------------------------------------------------------------------- #
 # GDELT — free topic search, supplies the readable articles
 # --------------------------------------------------------------------------- #
-def gdelt_topic(query: str, max_records: int = 8, retries: int = 5) -> list[dict]:
+def gdelt_topic(query: str, max_records: int = 8, retries: int = 1,
+                deadline: float | None = None) -> list[dict]:
     """Recent articles matching a topic query. Returns [] on any failure.
 
-    GDELT throttles per IP and shared/cloud addresses get 429s well beyond the
-    documented 5s window — during testing a busy IP needed 7 attempts before
-    succeeding. Retries are therefore patient rather than immediate; results are
-    cached for 30 minutes upstream, so a slow first load is paid only once.
+    NEVER blocks the caller for long. GDELT is a nice-to-have topic source, not
+    the page's only news, so it is strictly time-boxed:
+
+      * `deadline` is an absolute time.time() value the caller owns. We refuse to
+        start an attempt we cannot finish inside it. This is what keeps the Home
+        page bounded no matter how many themes are requested.
+      * one cheap retry, not five. A 429 from a shared IP does not clear in
+        seconds, so extra attempts buy nothing but latency.
+      * on failure the module-level breaker opens for GDELT_COOLDOWN, so the
+        other themes in the same page load skip the network entirely.
     """
-    global _last_gdelt_call
+    global _last_gdelt_call, _gdelt_blocked_until
+    if not gdelt_available():
+        return []
     params = urllib.parse.urlencode({
         "query": query, "mode": "artlist", "maxrecords": max_records,
         "format": "json", "sort": "datedesc",
@@ -82,7 +105,10 @@ def gdelt_topic(query: str, max_records: int = 8, retries: int = 5) -> list[dict
     url = f"https://api.gdeltproject.org/api/v2/doc/doc?{params}"
 
     for attempt in range(retries + 1):
-        wait = GDELT_MIN_INTERVAL - (time.time() - _last_gdelt_call)
+        wait = max(0.0, GDELT_MIN_INTERVAL - (time.time() - _last_gdelt_call))
+        # Budget check: pacing wait + the request's own timeout must both fit.
+        if deadline is not None and time.time() + wait + 8 > deadline:
+            return []
         if wait > 0:
             time.sleep(wait)
         try:
@@ -104,8 +130,9 @@ def gdelt_topic(query: str, max_records: int = 8, retries: int = 5) -> list[dict
             return out
         except Exception:
             if attempt >= retries:
+                _gdelt_blocked_until = time.time() + GDELT_COOLDOWN
                 return []
-            time.sleep(GDELT_MIN_INTERVAL * (attempt + 2))
+            time.sleep(1.0)
     return []
 
 
@@ -160,10 +187,15 @@ def _rss_date(raw: str) -> str:
     return ""
 
 
-def topic_news(theme: str, max_records: int = 6) -> list[dict]:
-    """Free, readable articles for one research vertical (GDELT)."""
+def topic_news(theme: str, max_records: int = 6,
+               deadline: float | None = None) -> list[dict]:
+    """Free, readable articles for one research vertical (GDELT).
+
+    `deadline` is an absolute time.time() the caller must not overrun; pass the
+    SAME value for every theme in a page load to cap the total, not each call.
+    """
     q = TOPIC_QUERIES.get(theme)
-    return gdelt_topic(q, max_records=max_records) if q else []
+    return gdelt_topic(q, max_records=max_records, deadline=deadline) if q else []
 
 
 def _main(argv) -> int:

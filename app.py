@@ -239,6 +239,11 @@ def home_movers_and_picks():
     return movers, top_picks
 
 
+# Total seconds GDELT may spend across ALL themes in one Home load. Yahoo covers
+# every theme anyway, so this is an upper bound on a bonus, not on the content.
+GDELT_BUDGET_S = 12
+
+
 @st.cache_data(ttl=30 * 60, show_spinner=False)
 def home_research_news():
     """Per-theme news, GDELT first then Yahoo.
@@ -247,12 +252,19 @@ def home_research_news():
     data-centre-cooling stories, not just companies whose names matched). Yahoo
     is per-company only, so it's the fallback/top-up. GDELT fails soft, in which
     case a theme simply shows the Yahoo items as before.
+
+    TIME-BOXED: GDELT gets ONE shared budget for all themes combined, not per
+    theme. Without this the Home page hung for minutes — measured 2026-07-31, a
+    single theme spent 187s on its retry ladder and returned zero articles from
+    this IP. Yahoo (~1s per theme) always runs, so the page is never empty.
     """
+    import time
     import home
     import news_feeds as nf
+    gdelt_deadline = time.time() + GDELT_BUDGET_S
     out = {}
     for theme in home.NEWS_THEMES:
-        items = nf.topic_news(theme, max_records=6)
+        items = nf.topic_news(theme, max_records=6, deadline=gdelt_deadline)
         seen = {i["title"] for i in items}
         # Top up with Yahoo so a column is never thin if GDELT is throttled.
         for y in home.news_for_theme(theme, per_ticker=4, total=10):

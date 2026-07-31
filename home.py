@@ -65,17 +65,32 @@ NEWS_THEMES = {
 
 
 def market_snapshot(group: str) -> list[dict]:
-    """Live price + % change for one market group. Empty entries are skipped."""
+    """Live price + % change for one market group. Empty entries are skipped.
+
+    Batched deliberately: one yf.download for the whole group instead of a
+    Ticker.history per symbol. Measured 2026-07-31, the sequential version cost
+    ~8s for five indices, so all five groups together were a ~35s wall the Home
+    page had to climb before drawing anything. One threaded request is ~2s.
+    """
+    pairs = MARKET_GROUPS.get(group, [])
+    if not pairs:
+        return []
+    syms = [s for s, _ in pairs]
+    try:
+        df = yf.download(syms, period="5d", progress=False,
+                         group_by="ticker", threads=True)
+    except Exception:
+        return []
+
     out = []
-    for sym, label in MARKET_GROUPS.get(group, []):
+    for sym, label in pairs:
         try:
-            h = yf.Ticker(sym).history(period="5d")
-            close = h["Close"].dropna()
+            close = (df[sym]["Close"] if len(syms) > 1 else df["Close"]).dropna()
             if len(close) < 2:
                 continue
             last, prev = float(close.iloc[-1]), float(close.iloc[-2])
             out.append({"symbol": sym, "label": label, "price": last,
-                       "chg_pct": (last / prev - 1) if prev else None})
+                        "chg_pct": (last / prev - 1) if prev else None})
         except Exception:
             continue
     return out
